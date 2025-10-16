@@ -631,8 +631,3 @@ predominante no município (aberta, intermediária e fechada) e nota específica
 
 if __name__ == "__main__":
     main()
-
-
-
-if __name__ == "__main__":
-    main()
