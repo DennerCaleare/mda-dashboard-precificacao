@@ -1,7 +1,7 @@
 """Componentes de interface do usuário."""
 
 import streamlit as st
-from ..config.settings import COLORS
+from mda_app.config.settings import COLORS
 
 
 def render_header():

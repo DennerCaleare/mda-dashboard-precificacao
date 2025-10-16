@@ -2,11 +2,11 @@
 
 import streamlit as st
 import numpy as np
-from .config.settings import APP_CONFIG
-from .core.data_loader import carregar_dados, processar_dados_geograficos
-from .components.ui_components import render_header, render_metrics
-from .components.visualizations import criar_mapa, criar_histograma, criar_scatter_plot
-from .utils.formatters import reais
+from mda_app.config.settings import APP_CONFIG
+from mda_app.core.data_loader import carregar_dados, processar_dados_geograficos
+from mda_app.components.ui_components import render_header, render_metrics
+from mda_app.components.visualizations import criar_mapa, criar_histograma, criar_scatter_plot
+from mda_app.utils.formatters import reais
 
 
 def configurar_pagina():
