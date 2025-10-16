@@ -293,10 +293,10 @@ predominante no município (aberta, intermediária e fechada) e nota específica
             # Um único município selecionado - mostrar dados específicos
             municipio_especifico = gdf_filtrado.iloc[0]
             nome_municipio = municipio_especifico.get('mun_nome', municipio_especifico['NM_MUN'])
-            st.markdown(f"<h3 style='text-align: center;'>Estatísticas - {nome_municipio}</h3>", unsafe_allow_html=True)
+            st.markdown(f"<h3 style='text-align: center;'>Informações Adicionais - {nome_municipio}</h3>", unsafe_allow_html=True)
         else:
             # Múltiplos municípios - mostrar dados agregados
-            st.markdown("<h3 style='text-align: center;'>Estatísticas</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='text-align: center;'>Informações Adicionais</h3>", unsafe_allow_html=True)
         
         # Linha 1: 5 colunas
         col1, col2, col3, col4, col5 = st.columns(5)
@@ -307,19 +307,19 @@ predominante no município (aberta, intermediária e fechada) e nota específica
             
             if 'area_georef' in municipio_especifico:
                 area_fmt = f"{municipio_especifico['area_georef']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                col1.metric("Área (ha)", area_fmt)
+                col1.metric("Área total do Município (ha)", area_fmt)
             
             if 'perimetro_total_car' in municipio_especifico:
                 perimetro_fmt = f"{municipio_especifico['perimetro_total_car']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                col2.metric("Perímetro (km)", perimetro_fmt)
+                col2.metric("Perímetro Georreferencial do Município (km)", perimetro_fmt)
             
             if 'area_car_media' in municipio_especifico:
                 tamanho_fmt = f"{municipio_especifico['area_car_media']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                col3.metric("Tamanho Médio Imóvel (ha)", tamanho_fmt)
+                col3.metric("Tamanho Médio Imóvel CAR (ha)", tamanho_fmt)
             
             if 'perimetro_medio_car' in municipio_especifico:
                 perimetro_medio_fmt = f"{municipio_especifico['perimetro_medio_car']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                col4.metric("Perímetro Médio Imóvel (km)", perimetro_medio_fmt)
+                col4.metric("Perímetro Médio Imóvel CAR (km)", perimetro_medio_fmt)
             
             # Valor médio por hectare
             if 'valor_mun_area' in municipio_especifico and 'area_georef' in municipio_especifico:
@@ -337,17 +337,17 @@ predominante no município (aberta, intermediária e fechada) e nota específica
             if 'perimetro_total_car' in gdf_filtrado.columns:
                 perimetro_total = gdf_filtrado['perimetro_total_car'].sum()
                 perimetro_fmt = f"{perimetro_total:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                col2.metric("Perímetro Total (km)", perimetro_fmt)
+                col2.metric("Perímetro Total Georreferenciável (km)", perimetro_fmt)
             
             if 'area_car_media' in gdf_filtrado.columns:
                 tamanho_medio = gdf_filtrado['area_car_media'].mean()
                 tamanho_fmt = f"{tamanho_medio:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                col3.metric("Tamanho Médio Imóvel (ha)", tamanho_fmt)
+                col3.metric("Tamanho Médio Imóvel CAR (ha)", tamanho_fmt)
             
             if 'perimetro_medio_car' in gdf_filtrado.columns:
                 perimetro_medio = gdf_filtrado['perimetro_medio_car'].mean()
                 perimetro_medio_fmt = f"{perimetro_medio:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                col4.metric("Perímetro Médio Imóvel (km)", perimetro_medio_fmt)
+                col4.metric("Perímetro Médio Imóvel CAR (km)", perimetro_medio_fmt)
             
             # Valor médio por hectare
             if 'valor_mun_area' in gdf_filtrado.columns and 'area_georef' in gdf_filtrado.columns:
@@ -390,11 +390,11 @@ predominante no município (aberta, intermediária e fechada) e nota específica
                     
                     valor_min = gdf_temp['valor_por_ha'].min()
                     valor_min_fmt = f"R$ {valor_min:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                    col2.metric("Valor Mín/ha", valor_min_fmt)
+                    col2.metric("Valor Mínimo/ha", valor_min_fmt)
                     
                     valor_max = gdf_temp['valor_por_ha'].max()
                     valor_max_fmt = f"R$ {valor_max:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                    col3.metric("Valor Máx/ha", valor_max_fmt)
+                    col3.metric("Valor Máximo/ha", valor_max_fmt)
             
             # Valores Min/Max por quilômetro
             if 'valor_mun_perim' in gdf_filtrado.columns and 'perimetro_total_car' in gdf_filtrado.columns:
@@ -404,11 +404,11 @@ predominante no município (aberta, intermediária e fechada) e nota específica
                     
                     valor_min_km = gdf_temp['valor_por_km'].min()
                     valor_min_km_fmt = f"R$ {valor_min_km:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                    col4.metric("Valor Mín/km", valor_min_km_fmt)
+                    col4.metric("Valor Mínimo/km", valor_min_km_fmt)
                     
                     valor_max_km = gdf_temp['valor_por_km'].max()
                     valor_max_km_fmt = f"R$ {valor_max_km:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                    col5.metric("Valor Máx/km", valor_max_km_fmt)
+                    col5.metric("Valor Máximo/km", valor_max_km_fmt)
         
         st.markdown("---")
         
@@ -560,19 +560,23 @@ predominante no município (aberta, intermediária e fechada) e nota específica
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            total_q1_fmt = f"R$ {total_q1:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            total_q1_mi = total_q1 / 1_000_000
+            total_q1_fmt = f"R$ {total_q1_mi:,.3f} Mi".replace(",", "X").replace(".", ",").replace("X", ".")
             st.metric("1º Trimestre", total_q1_fmt)
         
         with col2:
-            total_q2_fmt = f"R$ {total_q2:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            total_q2_mi = total_q2 / 1_000_000
+            total_q2_fmt = f"R$ {total_q2_mi:,.3f} Mi".replace(",", "X").replace(".", ",").replace("X", ".")
             st.metric("2º Trimestre", total_q2_fmt)
         
         with col3:
-            total_q3_fmt = f"R$ {total_q3:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            total_q3_mi = total_q3 / 1_000_000
+            total_q3_fmt = f"R$ {total_q3_mi:,.3f} Mi".replace(",", "X").replace(".", ",").replace("X", ".")
             st.metric("3º Trimestre", total_q3_fmt)
         
         with col4:
-            total_q4_fmt = f"R$ {total_q4:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            total_q4_mi = total_q4 / 1_000_000
+            total_q4_fmt = f"R$ {total_q4_mi:,.3f} Mi".replace(",", "X").replace(".", ",").replace("X", ".")
             st.metric("4º Trimestre", total_q4_fmt)
         
         st.markdown("---")
