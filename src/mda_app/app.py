@@ -436,16 +436,25 @@ predominante no município (aberta, intermediária e fechada) e nota específica
                         y=valores,
                         marker_color=['#6C9BCF', '#8BB8E8', '#A9CCE3', '#C5DEDD'],
                         text=[f'{v:.2f}' for v in valores],
-                        textposition='auto',
+                        textposition='outside',
                     )
                 ])
                 
                 fig_barras.update_layout(
-                    yaxis_title='',
-                    xaxis_title='',
-                    height=300,
+                    yaxis=dict(
+                        title='',
+                        showticklabels=False,
+                        showgrid=False,
+                        zeroline=False,
+                        range=[0, max(valores) * 1.15]
+                    ),
+                    xaxis=dict(
+                        title='',
+                        showgrid=False
+                    ),
+                    height=350,
                     showlegend=False,
-                    margin=dict(l=40, r=40, t=40, b=40)
+                    margin=dict(l=40, r=40, t=50, b=40)
                 )
                 
                 st.plotly_chart(fig_barras, use_container_width=True)
@@ -467,16 +476,25 @@ predominante no município (aberta, intermediária e fechada) e nota específica
                         y=valores,
                         marker_color=['#6C9BCF', '#8BB8E8', '#A9CCE3', '#C5DEDD'],
                         text=[f'{v:.2f}' for v in valores],
-                        textposition='auto',
+                        textposition='outside',
                     )
                 ])
                 
                 fig_barras.update_layout(
-                    yaxis_title='',
-                    xaxis_title='',
-                    height=300,
+                    yaxis=dict(
+                        title='',
+                        showticklabels=False,
+                        showgrid=False,
+                        zeroline=False,
+                        range=[0, max(valores) * 1.15]
+                    ),
+                    xaxis=dict(
+                        title='',
+                        showgrid=False
+                    ),
+                    height=350,
                     showlegend=False,
-                    margin=dict(l=40, r=40, t=40, b=40)
+                    margin=dict(l=40, r=40, t=50, b=40)
                 )
                 
                 st.plotly_chart(fig_barras, use_container_width=True)
@@ -520,11 +538,46 @@ predominante no município (aberta, intermediária e fechada) e nota específica
                     'borderwidth': 2,
                     'bordercolor': "gray",
                     'steps': [
-                        {'range': [0, 25], 'color': '#27ae60'},      # Verde escuro
-                        {'range': [25, 50], 'color': '#2ecc71'},     # Verde claro
-                        {'range': [50, 75], 'color': '#f1c40f'},     # Amarelo
-                        {'range': [75, 90], 'color': '#e67e22'},     # Laranja
-                        {'range': [90, 100], 'color': '#e74c3c'}     # Vermelho
+                        {'range': [0, 2.5], 'color': '#27ae60'},
+                        {'range': [2.5, 5], 'color': '#29b15e'},
+                        {'range': [5, 7.5], 'color': '#2cb55d'},
+                        {'range': [7.5, 10], 'color': '#2eb85b'},
+                        {'range': [10, 12.5], 'color': '#31bc5a'},
+                        {'range': [12.5, 15], 'color': '#36bf5c'},
+                        {'range': [15, 17.5], 'color': '#3dc261'},
+                        {'range': [17.5, 20], 'color': '#44c565'},
+                        {'range': [20, 22.5], 'color': '#4ec96a'},
+                        {'range': [22.5, 25], 'color': '#56cc6e'},
+                        {'range': [25, 27.5], 'color': '#5fcf73'},
+                        {'range': [27.5, 30], 'color': '#67d277'},
+                        {'range': [30, 32.5], 'color': '#70d57c'},
+                        {'range': [32.5, 35], 'color': '#78d880'},
+                        {'range': [35, 37.5], 'color': '#81db85'},
+                        {'range': [37.5, 40], 'color': '#89de89'},
+                        {'range': [40, 42.5], 'color': '#92e08e'},
+                        {'range': [42.5, 45], 'color': '#9ae292'},
+                        {'range': [45, 47.5], 'color': '#a3e597'},
+                        {'range': [47.5, 50], 'color': '#abe79b'},
+                        {'range': [50, 52.5], 'color': '#b4e9a0'},
+                        {'range': [52.5, 55], 'color': '#bceba4'},
+                        {'range': [55, 57.5], 'color': '#c5eda9'},
+                        {'range': [57.5, 60], 'color': '#cdefad'},
+                        {'range': [60, 62.5], 'color': '#d6f0b2'},
+                        {'range': [62.5, 65], 'color': '#def2b6'},
+                        {'range': [65, 67.5], 'color': '#e7f3bb'},
+                        {'range': [67.5, 70], 'color': '#eff4bf'},
+                        {'range': [70, 72.5], 'color': '#f8f5c4'},
+                        {'range': [72.5, 75], 'color': '#f9f2b8'},
+                        {'range': [75, 77.5], 'color': '#fae9a0'},
+                        {'range': [77.5, 80], 'color': '#f9e18e'},
+                        {'range': [80, 82.5], 'color': '#f7d87c'},
+                        {'range': [82.5, 85], 'color': '#f6d06a'},
+                        {'range': [85, 87.5], 'color': '#f4c258'},
+                        {'range': [87.5, 90], 'color': '#f2b446'},
+                        {'range': [90, 92.5], 'color': '#f0a634'},
+                        {'range': [92.5, 95], 'color': '#ec8e2c'},
+                        {'range': [95, 97.5], 'color': '#e96a30'},
+                        {'range': [97.5, 100], 'color': '#e74c3c'}
                     ],
                     'threshold': {
                         'line': {'color': "darkblue", 'width': 4},
@@ -543,10 +596,10 @@ predominante no município (aberta, intermediária e fechada) e nota específica
         
         st.markdown("---")
         
-        # Valores Totais por Trimestre
+        # Valores Totais Trimestrais por Nota
         st.markdown("""
                     <div style='text-align: center; display: flex; align-items: center; justify-content: center;'>
-                        <h3 style='margin: 0; padding-right: 5px;'>Valores Totais por Trimestre</h3>
+                        <h3 style='margin: 0; padding-right: 5px;'>Valores Totais Trimestrais por Nota</h3>
                         <div class="tooltip">
                             <span style='cursor: help; color: #0066cc; font-size: 16px;'>ⓘ</span>
                             <span class="tooltiptext">
@@ -619,6 +672,124 @@ predominante no município (aberta, intermediária e fechada) e nota específica
             total_q4_fmt = f"R$ {total_q4_mi:,.3f} Mi".replace(",", "X").replace(".", ",").replace("X", ".")
             st.metric("4º Trimestre", total_q4_fmt)
         
+        st.markdown("---")
+        
+        # --- Gráfico: Composição média das notas por UF (versão final) ---
+        st.markdown("<h3 style='text-align: center;'>Composição Média das Notas por UF</h3>", unsafe_allow_html=True)
+
+        # Selecionar colunas principais de notas
+        colunas_notas = ["nota_veg", "nota_area", "nota_relevo", "nota_insalub_2",
+                        "nota_total_q1", "nota_total_q2", "nota_total_q3", "nota_total_q4"]
+        colunas_presentes = [c for c in colunas_notas if c in gdf_filtrado.columns]
+
+        if len(colunas_presentes) >= 3:
+            # Calcular média das notas por UF
+            df_uf = (
+                gdf_filtrado.groupby("SIGLA_UF")[colunas_presentes]
+                .mean()
+                .reset_index()
+            )
+            
+            # Calcular total para ordenar por complexidade/custo
+            df_uf['total_notas'] = df_uf[colunas_presentes].sum(axis=1)
+            df_uf = df_uf.sort_values("total_notas", ascending=False)
+
+            # Dicionário de legendas amigáveis (ordem invertida para legenda)
+            legendas = {
+                "nota_total_q1": "Clima T1",
+                "nota_total_q2": "Clima T2",
+                "nota_total_q3": "Clima T3",
+                "nota_total_q4": "Clima T4",
+                "nota_insalub_2": "Insalubridade",
+                "nota_relevo": "Relevo",
+                "nota_area": "Área CAR",
+                "nota_veg": "Vegetação",
+            }
+
+            # Paleta suave consistente com o restante do app
+            cores = {
+                "nota_total_q1": "#6C9BCF",
+                "nota_total_q2": "#8BB8E8", 
+                "nota_total_q3": "#A9CCE3",
+                "nota_total_q4": "#C5DEDD",
+                "nota_insalub_2": "#9AD0EC",
+                "nota_relevo": "#C9E4F3",
+                "nota_area": "#A3C4BC",
+                "nota_veg": "#F2E8CF"
+            }
+
+            # Criar figura de barras empilhadas
+            fig_empilhado = go.Figure()
+
+            # Adicionar traços na ordem da legenda (invertida)
+            ordem_legenda = ["nota_total_q1", "nota_total_q2", "nota_total_q3", "nota_total_q4",
+                            "nota_insalub_2", "nota_relevo", "nota_area", "nota_veg"]
+            
+            # Filtrar apenas colunas presentes
+            ordem_legenda = [col for col in ordem_legenda if col in colunas_presentes]
+            
+            for coluna in ordem_legenda:
+                valores = df_uf[coluna].values
+                
+                fig_empilhado.add_trace(go.Bar(
+                    x=df_uf["SIGLA_UF"],
+                    y=valores,
+                    name=legendas.get(coluna, coluna),
+                    marker_color=cores.get(coluna, "#CCCCCC"),
+                    text="",  # Sem texto nas barras
+                    hovertemplate=legendas.get(coluna, coluna) + ": %{y:.2f}<extra></extra>"
+                ))
+
+            fig_empilhado.update_layout(
+                barmode="stack",
+                xaxis=dict(
+                    title="", 
+                    showgrid=False,
+                    tickfont=dict(size=12)
+                ),
+                yaxis=dict(
+                    title="", 
+                    showticklabels=False,  # Remove valores do eixo Y
+                    showgrid=False,
+                    zeroline=False
+                ),
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="center",
+                    x=0.5,
+                    font=dict(size=11),
+                    traceorder="normal"
+                ),
+                margin=dict(l=20, r=20, t=60, b=40),
+                height=600,
+                showlegend=True,
+                plot_bgcolor="white",
+                paper_bgcolor="white",
+                hovermode="x unified"
+            )
+            
+            # Customizar o hover
+            fig_empilhado.update_layout(
+                hoverlabel=dict(
+                    bgcolor="white",
+                    font_size=12,
+                    font_family="Arial"
+                )
+            )
+            
+            # Remover linha tracejada vertical do hover
+            fig_empilhado.update_xaxes(showspikes=False)
+            fig_empilhado.update_yaxes(showspikes=False)
+
+            st.plotly_chart(fig_empilhado, use_container_width=True)
+            
+            # Texto explicativo abaixo do gráfico
+            st.caption("* Estados ordenados por pontuação total. Passe o mouse sobre as barras para ver valores detalhados.")
+        else:
+            st.info("Notas insuficientes para gerar o gráfico de composição média por UF.")
+
         st.markdown("---")
         
         # Tabela de Municípios
