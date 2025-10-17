@@ -482,7 +482,7 @@ predominante no município (aberta, intermediária e fechada) e nota específica
                 st.plotly_chart(fig_barras, use_container_width=True)
         
         with col_grafico2:
-            st.markdown("<h4 style='text-align: center;'>Percentagem Área Georreferenciável</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center;'>Percentual de Área Georreferenciável</h4>", unsafe_allow_html=True)
             
             # Calcular percentagem de área georreferenciável da coluna percent_area_georef
             if len(gdf_filtrado) == 1:
@@ -543,8 +543,48 @@ predominante no município (aberta, intermediária e fechada) e nota específica
         
         st.markdown("---")
         
-        # Valores por Trimestre
-        st.markdown("<h3 style='text-align: center;'>Valores por Trimestre</h3>", unsafe_allow_html=True)
+        # Valores Totais por Trimestre
+        st.markdown("""
+                    <div style='text-align: center; display: flex; align-items: center; justify-content: center;'>
+                        <h3 style='margin: 0; padding-right: 5px;'>Valores Totais por Trimestre</h3>
+                        <div class="tooltip">
+                            <span style='cursor: help; color: #0066cc; font-size: 16px;'>ⓘ</span>
+                            <span class="tooltiptext">
+                                Valores totais calculados para cada trimestre considerando a nota total 
+                                do período e a área georreferenciável. O cálculo é feito aplicando-se 
+                                as faixas de valores da tabela INCRA de acordo com a pontuação obtida 
+                                em cada trimestre.
+                            </span>
+                        </div>
+                    </div>
+                    <style>
+                    .tooltip {
+                        position: relative;
+                        display: inline-block;
+                    }
+                    .tooltip .tooltiptext {
+                        visibility: hidden;
+                        width: 300px;
+                        background-color: #555;
+                        color: #fff;
+                        text-align: center;
+                        border-radius: 6px;
+                        padding: 10px;
+                        position: absolute;
+                        z-index: 1;
+                        bottom: 125%;
+                        left: 50%;
+                        margin-left: -150px;
+                        opacity: 0;
+                        transition: opacity 0.3s;
+                        font-size: 14px;
+                    }
+                    .tooltip:hover .tooltiptext {
+                        visibility: visible;
+                        opacity: 1;
+                    }
+                    </style>
+                    """, unsafe_allow_html=True)
         
         # Calcular valores totais por trimestre
         total_q1 = sum(calcular_valor_por_nota(row['nota_total_q1'], row['area_georef']) 
@@ -587,11 +627,6 @@ predominante no município (aberta, intermediária e fechada) e nota específica
         if "fid" in gdf_filtrado.columns:
             colunas_excluir.append("fid")
         st.dataframe(gdf_filtrado.drop(columns=colunas_excluir), use_container_width=True)
-
-
-if __name__ == "__main__":
-    main()
-
 
 
 if __name__ == "__main__":
