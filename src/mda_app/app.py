@@ -269,22 +269,44 @@ predominante no município (aberta, intermediária e fechada) e nota específica
     
     # Aba Mapa (índice 0)
     with abas[0]:
-        # Criar mapa simples sem interação de cliques
+        # Criar mapa com interação de cliques
         m = criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True)
         
         from streamlit_folium import st_folium
         
-        # Mapa estático - sem interação de cliques
         # A chave é baseada apenas em critério e UFs para permitir atualização quando necessário
         mapa_key = f"mapa_{criterio_sel}_{'_'.join(sorted(uf_sel))}"
         
-        # Renderizar mapa estático (sem capturar cliques)
-        st_folium(
+        # Renderizar mapa capturando cliques
+        output_map = st_folium(
             m, 
             width=None, 
             height=500, 
             key=mapa_key
         )
+        
+        # Processar clique no mapa
+        if output_map and output_map.get("last_object_clicked"):
+            # Obter coordenadas do clique
+            lat = output_map["last_object_clicked"]["lat"]
+            lng = output_map["last_object_clicked"]["lng"]
+            
+            # Determinar qual coluna de nome usar
+            coluna_nome = 'mun_nome' if 'mun_nome' in gdf_filtrado.columns else 'NM_MUN'
+            
+            # Encontrar o município clicado
+            from shapely.geometry import Point
+            ponto_clicado = Point(lng, lat)
+            
+            for idx, row in gdf_filtrado.iterrows():
+                if row['geometry'].contains(ponto_clicado):
+                    municipio_clicado = row[coluna_nome]
+                    
+                    # Adicionar ao session_state se ainda não estiver
+                    if municipio_clicado not in st.session_state.municipios_selecionados:
+                        st.session_state.municipios_selecionados.append(municipio_clicado)
+                        st.rerun()
+                    break
         
         st.markdown("---")
         

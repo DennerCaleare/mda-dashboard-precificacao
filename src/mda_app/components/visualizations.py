@@ -7,23 +7,35 @@ import plotly.express as px
 from branca.element import Template, MacroElement
 
 
-def get_color(value, min_val, max_val):
-    """Gerar cor baseada no valor normalizado."""
-    norm = (value - min_val) / (max_val - min_val)
+def get_color(value, min_val, max_val, global_min=0, global_max=60):
+    """Gerar cor baseada no valor normalizado.
+    
+    Args:
+        value: Valor a ser colorido
+        min_val: Valor mínimo no conjunto filtrado
+        max_val: Valor máximo no conjunto filtrado
+        global_min: Valor mínimo absoluto da escala (padrão: 0)
+        global_max: Valor máximo absoluto da escala (padrão: 60)
+    """
+    # Se min e max são iguais, usar escala global
+    if max_val == min_val or (max_val - min_val) < 0.01:
+        norm = (value - global_min) / (global_max - global_min)
+    else:
+        norm = (value - min_val) / (max_val - min_val)
+    
+    # Garantir que norm está entre 0 e 1
+    norm = max(0, min(1, norm))
+    
     if norm < 0.5:
         r = 0
         g = int(255 * (2 * norm))
         b = int(255 * (1 - 2 * norm))
     else:
-        try:
-            norm2 = 2 * (norm - 0.5)
-            r = int(255 * norm2)
-            g = int(255 * (1 - norm2))
-            b = 0
-        except Exception as e:
-            r = 55
-            g = 110
-            b = 33
+        norm2 = 2 * (norm - 0.5)
+        r = int(255 * norm2)
+        g = int(255 * (1 - norm2))
+        b = 0
+    
     return f'#{r:02x}{g:02x}{b:02x}'
 
 
@@ -61,12 +73,16 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
     min_val = gdf_filtrado[criterio_sel].min()
     max_val = gdf_filtrado[criterio_sel].max()
     
+    # Definir escala global (0 a 60 para notas)
+    global_min = 0
+    global_max = 60
+    
     # Criar um FeatureGroup para agrupar todos os municípios (não aparece no controle de camadas)
     municipios_layer = folium.FeatureGroup(name='Municípios', show=True, control=False)
     
     # Adicionar polígonos ao mapa com ID único para capturar cliques
     for idx, row in gdf_filtrado.iterrows():
-        color = get_color(row[criterio_sel], min_val, max_val)
+        color = get_color(row[criterio_sel], min_val, max_val, global_min, global_max)
         
         # Usar mun_nome se disponível, senão NM_MUN
         nome_municipio = row.get('mun_nome', row['NM_MUN'])
@@ -76,14 +92,14 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
             nome_municipio,
             sticky=False,
             style="""
-                background-color: rgba(255, 255, 255, 0.9);
-                border: 1px solid #333;
-                border-radius: 4px;
-                padding: 5px 10px;
+                background-color: rgba(255, 255, 255, 0.95);
+                border: 2px solid #0066cc;
+                border-radius: 6px;
+                padding: 8px 12px;
                 font-size: 13px;
                 font-weight: 500;
                 color: #333;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                box-shadow: 0 3px 6px rgba(0,0,0,0.3);
             """
         )
         
@@ -98,7 +114,7 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
             },
             highlight_function=lambda x: {
                 'weight': 3,
-                'color': 'yellow',
+                'color': '#0066cc',
                 'fillOpacity': 0.9
             },
             tooltip=tooltip
@@ -110,6 +126,59 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
     # Ajustar zoom automaticamente para os limites dos dados filtrados
     bounds = gdf_filtrado.total_bounds  # [minx, miny, maxx, maxy]
     m.fit_bounds([[bounds[1], bounds[0]], [bounds[3], bounds[2]]], padding=[padding_zoom, padding_zoom])
+    
+    # Criar legenda com gradiente de cores
+    # Gerar cores de exemplo para verificar o gradiente correto
+    num_steps = 100
+    gradient_colors = []
+    for i in range(num_steps):
+        norm = i / (num_steps - 1)
+        if norm < 0.5:
+            r = 0
+            g = int(255 * (2 * norm))
+            b = int(255 * (1 - 2 * norm))
+        else:
+            norm2 = 2 * (norm - 0.5)
+            r = int(255 * norm2)
+            g = int(255 * (1 - norm2))
+            b = 0
+        gradient_colors.append(f'#{r:02x}{g:02x}{b:02x}')
+    
+    gradient_str = ', '.join(gradient_colors)
+    
+    # Determinar valores para a legenda
+    # Se há apenas um município ou valores muito próximos, usar escala global
+    if max_val == min_val or (max_val - min_val) < 0.01:
+        legend_min = global_min
+        legend_max = global_max
+    else:
+        legend_min = min_val
+        legend_max = max_val
+    
+    legend_html = f'''
+    <div style="position: fixed; 
+                bottom: 50px; 
+                left: 50px; 
+                width: 200px; 
+                background-color: white; 
+                border: 2px solid grey; 
+                border-radius: 5px;
+                z-index: 9999; 
+                font-size: 14px;
+                padding: 10px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+        <p style="margin: 0 0 10px 0; font-weight: bold; text-align: center; font-size: 12px;">Grau de Dificuldade</p>
+        <div style="background: linear-gradient(to right, {gradient_str}); 
+                    height: 20px; 
+                    border: 1px solid #333;
+                    border-radius: 3px;"></div>
+        <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px;">
+            <span>{legend_min:.2f}</span>
+            <span>{legend_max:.2f}</span>
+        </div>
+    </div>
+    '''
+    m.get_root().html.add_child(folium.Element(legend_html))
     
     # Adicionar controle de camadas (opcional)
     if mostrar_controle_camadas:
