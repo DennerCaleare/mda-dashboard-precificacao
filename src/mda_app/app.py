@@ -617,15 +617,15 @@ predominante no município (aberta, intermediária e fechada) e nota específica
             st.plotly_chart(fig_gauge, use_container_width=True)
         
         st.markdown("---")
-        
-        # Valores Totais Trimestrais por Graus de Dificuldade
+
+        # Valores Totais Trimestrais por Nota
         st.markdown("""
                     <div style='text-align: center; display: flex; align-items: center; justify-content: center;'>
-                        <h3 style='margin: 0; padding-right: 5px;'>Valores Totais Trimestrais por Grau de Dificuldade</h3>
+                        <h3 style='margin: 0; padding-right: 5px;'>Valores Totais Trimestrais por Nota</h3>
                         <div class="tooltip">
                             <span style='cursor: help; color: #0066cc; font-size: 16px;'>ⓘ</span>
                             <span class="tooltiptext">
-                                Valores totais calculados para cada trimestre considerando o grau de dificuldade total 
+                                Valores totais calculados para cada trimestre considerando a nota total 
                                 do período e a área georreferenciável. O cálculo é feito aplicando-se 
                                 as faixas de valores da tabela INCRA de acordo com a pontuação obtida 
                                 em cada trimestre.
