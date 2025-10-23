@@ -99,7 +99,7 @@ def criar_filtros_sidebar(gdf):
         "valor_medio": "Valor Médio",
         "valor_mun_perim": "Valor por Perímetro", 
         "valor_mun_area": "Valor por Área",
-        "nota_media": "Nota Média",
+        "nota_media": "Grau de Dificuldade Médio",
         "nota_veg": "Vegetação",
         "nota_area": "Área Média dos Lotes CAR",
         "nota_relevo": "Relevo",
@@ -112,18 +112,18 @@ def criar_filtros_sidebar(gdf):
     }
     criterio_explicacao = {
         "valor_medio": "Média entre valor por perímetro e valor por área.",
-        "nota_veg": "Nota relativa à vegetação do local. Calculada de acordo com a classe predominante no município (aberta, intermediária e fechada) e média de ocorrência de classe no intervalo.",
-        "nota_area": "Nota relativa à área média de lotes CAR na área do município. Acima de 35ha, entre 15 e 35ha, até 15ha, conforme máximas e mínimas.",
-        "nota_relevo": "Nota relativa ao relevo predominante no município.",
-        "nota_insalub": "Nota relativa à insalubridade (casos de dengue por município). Distribuída conforme máximos e mínimos gerais.",
-        "nota_insalub_2": "Nota relativa à insalubridade ajustada, incluindo incidência de ataques de animais peçonhentos.",
+        "nota_veg": "Grau de dificuldade relativo à vegetação do local. Calculada de acordo com a classe predominante no município (aberta, intermediária e fechada) e média de ocorrência de classe no intervalo.",
+        "nota_area": "Grau de dificuldade relativo à área média de lotes CAR na área do município. Acima de 35ha, entre 15 e 35ha, até 15ha, conforme máximas e mínimas.",
+        "nota_relevo": "Grau de dificuldade relativo ao relevo predominante no município.",
+        "nota_insalub": "Grau de dificuldade relativo à insalubridade (casos de dengue por município). Distribuída conforme máximos e mínimos gerais.",
+        "nota_insalub_2": "Grau de dificuldade relativo à insalubridade ajustada, incluindo incidência de ataques de animais peçonhentos.",
         "valor_mun_perim": "Valor total do município em relação ao perímetro total de imóveis CAR, utilizando dados do Quadro II da Tabela de Rendimento e Preço do Anexo I da INSTRUÇÃO NORMATIVA SEI/INCRA.",
         "valor_mun_area": "Valor total do município em relação à área georreferenciável.",
         "nota_media": "Média das notas utilizada para composição do valor final.",
-        "nota_total_q1": "Nota total somada para o trimestre 1",
-        "nota_total_q2": "Nota total somada para o trimestre 2",
-        "nota_total_q3": "Nota total somada para o trimestre 3", 
-        "nota_total_q4": "Nota total somada para o trimestre 4"
+        "nota_total_q1": "Grau de dificuldade total somada para o trimestre 1",
+        "nota_total_q2": "Grau de dificuldade total somada para o trimestre 2",
+        "nota_total_q3": "Grau de dificuldade total somada para o trimestre 3", 
+        "nota_total_q4": "Grau de dificuldade total somada para o trimestre 4"
     }
     
     # Seleção de critério
@@ -416,7 +416,7 @@ predominante no município (aberta, intermediária e fechada) e nota específica
         col_grafico1, col_grafico2 = st.columns(2)
         
         with col_grafico1:
-            st.markdown("<h4 style='text-align: center;'>Notas por Trimestre</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center;'>Grau de Dificuldade por Trimestre</h4>", unsafe_allow_html=True)
             # Se houver município único, mostrar dados dele; senão, médias gerais
             if len(gdf_filtrado) == 1:
                 import plotly.graph_objects as go
@@ -596,14 +596,14 @@ predominante no município (aberta, intermediária e fechada) e nota específica
         
         st.markdown("---")
         
-        # Valores Totais Trimestrais por Nota
+        # Valores Totais Trimestrais por Graus de Dificuldade
         st.markdown("""
                     <div style='text-align: center; display: flex; align-items: center; justify-content: center;'>
-                        <h3 style='margin: 0; padding-right: 5px;'>Valores Totais Trimestrais por Nota</h3>
+                        <h3 style='margin: 0; padding-right: 5px;'>Valores Totais Trimestrais por Grau de Dificuldade</h3>
                         <div class="tooltip">
                             <span style='cursor: help; color: #0066cc; font-size: 16px;'>ⓘ</span>
                             <span class="tooltiptext">
-                                Valores totais calculados para cada trimestre considerando a nota total 
+                                Valores totais calculados para cada trimestre considerando o grau de dificuldade total 
                                 do período e a área georreferenciável. O cálculo é feito aplicando-se 
                                 as faixas de valores da tabela INCRA de acordo com a pontuação obtida 
                                 em cada trimestre.
@@ -675,7 +675,7 @@ predominante no município (aberta, intermediária e fechada) e nota específica
         st.markdown("---")
         
         # --- Gráfico: Composição média das notas por UF (versão final) ---
-        st.markdown("<h3 style='text-align: center;'>Composição Média das Notas por UF</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center;'>Composição Média dos Graus de Dificuldade por UF</h3>", unsafe_allow_html=True)
 
         # Selecionar colunas principais de notas
         colunas_notas = ["nota_veg", "nota_area", "nota_relevo", "nota_insalub_2",
@@ -788,7 +788,7 @@ predominante no município (aberta, intermediária e fechada) e nota específica
             # Texto explicativo abaixo do gráfico
             st.caption("* Estados ordenados por pontuação total. Passe o mouse sobre as barras para ver valores detalhados.")
         else:
-            st.info("Notas insuficientes para gerar o gráfico de composição média por UF.")
+            st.info("Graus de dificuldade insuficientes para gerar o gráfico de composição média por UF.")
 
         st.markdown("---")
         
