@@ -99,7 +99,7 @@ def criar_filtros_sidebar(gdf):
         "valor_medio": "Valor Médio",
         "valor_mun_perim": "Valor por Perímetro", 
         "valor_mun_area": "Valor por Área",
-        "nota_media": "Nota Média",
+        "nota_media": "Grau de Dificuldade Médio",
         "nota_veg": "Vegetação",
         "nota_area": "Área Média dos Lotes CAR",
         "nota_relevo": "Relevo",
@@ -112,18 +112,18 @@ def criar_filtros_sidebar(gdf):
     }
     criterio_explicacao = {
         "valor_medio": "Média entre valor por perímetro e valor por área.",
-        "nota_veg": "Nota relativa à vegetação do local. Calculada de acordo com a classe predominante no município (aberta, intermediária e fechada) e média de ocorrência de classe no intervalo.",
-        "nota_area": "Nota relativa à área média de lotes CAR na área do município. Acima de 35ha, entre 15 e 35ha, até 15ha, conforme máximas e mínimas.",
-        "nota_relevo": "Nota relativa ao relevo predominante no município.",
-        "nota_insalub": "Nota relativa à insalubridade (casos de dengue por município). Distribuída conforme máximos e mínimos gerais.",
-        "nota_insalub_2": "Nota relativa à insalubridade ajustada, incluindo incidência de ataques de animais peçonhentos.",
+        "nota_veg": "Grau de dificuldade relativo à vegetação do local. Calculada de acordo com a classe predominante no município (aberta, intermediária e fechada) e média de ocorrência de classe no intervalo.",
+        "nota_area": "Grau de dificuldade relativo à área média de lotes CAR na área do município. Acima de 35ha, entre 15 e 35ha, até 15ha, conforme máximas e mínimas.",
+        "nota_relevo": "Grau de dificuldade relativo ao relevo predominante no município.",
+        "nota_insalub": "Grau de dificuldade relativo à insalubridade (casos de dengue por município). Distribuída conforme máximos e mínimos gerais.",
+        "nota_insalub_2": "Grau de dificuldade relativo à insalubridade ajustada, incluindo incidência de ataques de animais peçonhentos.",
         "valor_mun_perim": "Valor total do município em relação ao perímetro total de imóveis CAR, utilizando dados do Quadro II da Tabela de Rendimento e Preço do Anexo I da INSTRUÇÃO NORMATIVA SEI/INCRA.",
         "valor_mun_area": "Valor total do município em relação à área georreferenciável.",
         "nota_media": "Média das notas utilizada para composição do valor final.",
-        "nota_total_q1": "Nota total somada para o trimestre 1",
-        "nota_total_q2": "Nota total somada para o trimestre 2",
-        "nota_total_q3": "Nota total somada para o trimestre 3", 
-        "nota_total_q4": "Nota total somada para o trimestre 4"
+        "nota_total_q1": "Grau de dificuldade total somada para o trimestre 1",
+        "nota_total_q2": "Grau de dificuldade total somada para o trimestre 2",
+        "nota_total_q3": "Grau de dificuldade total somada para o trimestre 3", 
+        "nota_total_q4": "Grau de dificuldade total somada para o trimestre 4"
     }
     
     # Seleção de critério
@@ -416,7 +416,7 @@ predominante no município (aberta, intermediária e fechada) e nota específica
         col_grafico1, col_grafico2 = st.columns(2)
         
         with col_grafico1:
-            st.markdown("<h4 style='text-align: center;'>Notas por Trimestre</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center;'>Grau de Dificuldade por Trimestre</h4>", unsafe_allow_html=True)
             # Se houver município único, mostrar dados dele; senão, médias gerais
             if len(gdf_filtrado) == 1:
                 import plotly.graph_objects as go
@@ -595,7 +595,7 @@ predominante no município (aberta, intermediária e fechada) e nota específica
             st.plotly_chart(fig_gauge, use_container_width=True)
         
         st.markdown("---")
-        
+
         # Valores Totais Trimestrais por Nota
         st.markdown("""
                     <div style='text-align: center; display: flex; align-items: center; justify-content: center;'>
@@ -672,6 +672,124 @@ predominante no município (aberta, intermediária e fechada) e nota específica
             total_q4_fmt = f"R$ {total_q4_mi:,.3f} Mi".replace(",", "X").replace(".", ",").replace("X", ".")
             st.metric("4º Trimestre", total_q4_fmt)
         
+        st.markdown("---")
+        
+        # --- Gráfico: Composição média das notas por UF (versão final) ---
+        st.markdown("<h3 style='text-align: center;'>Composição Média dos Graus de Dificuldade por UF</h3>", unsafe_allow_html=True)
+
+        # Selecionar colunas principais de notas
+        colunas_notas = ["nota_veg", "nota_area", "nota_relevo", "nota_insalub_2",
+                        "nota_total_q1", "nota_total_q2", "nota_total_q3", "nota_total_q4"]
+        colunas_presentes = [c for c in colunas_notas if c in gdf_filtrado.columns]
+
+        if len(colunas_presentes) >= 3:
+            # Calcular média das notas por UF
+            df_uf = (
+                gdf_filtrado.groupby("SIGLA_UF")[colunas_presentes]
+                .mean()
+                .reset_index()
+            )
+            
+            # Calcular total para ordenar por complexidade/custo
+            df_uf['total_notas'] = df_uf[colunas_presentes].sum(axis=1)
+            df_uf = df_uf.sort_values("total_notas", ascending=False)
+
+            # Dicionário de legendas amigáveis (ordem invertida para legenda)
+            legendas = {
+                "nota_total_q1": "Clima T1",
+                "nota_total_q2": "Clima T2",
+                "nota_total_q3": "Clima T3",
+                "nota_total_q4": "Clima T4",
+                "nota_insalub_2": "Insalubridade",
+                "nota_relevo": "Relevo",
+                "nota_area": "Área CAR",
+                "nota_veg": "Vegetação",
+            }
+
+            # Paleta suave consistente com o restante do app
+            cores = {
+                "nota_total_q1": "#6C9BCF",
+                "nota_total_q2": "#8BB8E8", 
+                "nota_total_q3": "#A9CCE3",
+                "nota_total_q4": "#C5DEDD",
+                "nota_insalub_2": "#9AD0EC",
+                "nota_relevo": "#C9E4F3",
+                "nota_area": "#A3C4BC",
+                "nota_veg": "#F2E8CF"
+            }
+
+            # Criar figura de barras empilhadas
+            fig_empilhado = go.Figure()
+
+            # Adicionar traços na ordem da legenda (invertida)
+            ordem_legenda = ["nota_total_q1", "nota_total_q2", "nota_total_q3", "nota_total_q4",
+                            "nota_insalub_2", "nota_relevo", "nota_area", "nota_veg"]
+            
+            # Filtrar apenas colunas presentes
+            ordem_legenda = [col for col in ordem_legenda if col in colunas_presentes]
+            
+            for coluna in ordem_legenda:
+                valores = df_uf[coluna].values
+                
+                fig_empilhado.add_trace(go.Bar(
+                    x=df_uf["SIGLA_UF"],
+                    y=valores,
+                    name=legendas.get(coluna, coluna),
+                    marker_color=cores.get(coluna, "#CCCCCC"),
+                    text="",  # Sem texto nas barras
+                    hovertemplate=legendas.get(coluna, coluna) + ": %{y:.2f}<extra></extra>"
+                ))
+
+            fig_empilhado.update_layout(
+                barmode="stack",
+                xaxis=dict(
+                    title="", 
+                    showgrid=False,
+                    tickfont=dict(size=12)
+                ),
+                yaxis=dict(
+                    title="", 
+                    showticklabels=False,  # Remove valores do eixo Y
+                    showgrid=False,
+                    zeroline=False
+                ),
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="center",
+                    x=0.5,
+                    font=dict(size=11),
+                    traceorder="normal"
+                ),
+                margin=dict(l=20, r=20, t=60, b=40),
+                height=600,
+                showlegend=True,
+                plot_bgcolor="white",
+                paper_bgcolor="white",
+                hovermode="x unified"
+            )
+            
+            # Customizar o hover
+            fig_empilhado.update_layout(
+                hoverlabel=dict(
+                    bgcolor="white",
+                    font_size=12,
+                    font_family="Arial"
+                )
+            )
+            
+            # Remover linha tracejada vertical do hover
+            fig_empilhado.update_xaxes(showspikes=False)
+            fig_empilhado.update_yaxes(showspikes=False)
+
+            st.plotly_chart(fig_empilhado, use_container_width=True)
+            
+            # Texto explicativo abaixo do gráfico
+            st.caption("* Estados ordenados por pontuação total. Passe o mouse sobre as barras para ver valores detalhados.")
+        else:
+            st.info("Graus de dificuldade insuficientes para gerar o gráfico de composição média por UF.")
+
         st.markdown("---")
         
         # Tabela de Municípios
