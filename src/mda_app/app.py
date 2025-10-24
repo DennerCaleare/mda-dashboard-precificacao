@@ -89,6 +89,30 @@ def criar_filtros_sidebar(gdf):
         if municipios_sel != st.session_state.municipios_selecionados:
             st.session_state.municipios_selecionados = municipios_sel
         
+        # Seção de Adição Rápida - Mostrar apenas se não filtrado
+        if not municipios_sel or len(municipios_sel) < len(municipios):
+            st.sidebar.markdown("---")
+            st.sidebar.markdown("**⚡ Adicionar Rápido ao Filtro**")
+            
+            # Mostrar municípios não selecionados como botões
+            municipios_nao_selecionados = [m for m in municipios if m not in st.session_state.municipios_selecionados]
+            
+            # Limitar a 10 primeiros para não sobrecarregar
+            if len(municipios_nao_selecionados) > 0:
+                num_mostrar = min(10, len(municipios_nao_selecionados))
+                st.sidebar.caption(f"Mostrando {num_mostrar} de {len(municipios_nao_selecionados)} municípios disponíveis")
+                
+                # Criar 2 colunas para botões
+                cols = st.sidebar.columns(2)
+                for i, municipio in enumerate(municipios_nao_selecionados[:num_mostrar]):
+                    col_idx = i % 2
+                    with cols[col_idx]:
+                        if st.button(f"➕ {municipio[:15]}...", key=f"add_{municipio}", use_container_width=True):
+                            if municipio not in st.session_state.municipios_selecionados:
+                                st.session_state.municipios_selecionados.append(municipio)
+                                st.rerun()
+
+        
         # Se nenhum município selecionado, usar todos
         if not municipios_sel:
             municipios_sel = municipios
@@ -234,54 +258,21 @@ predominante no município (aberta, intermediária e fechada) e nota específica
     
     # Aba Mapa (índice 0)
     with abas[0]:
-        # Criar mapa com interação de cliques
+        # Criar mapa simples sem interação de cliques
         m = criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True)
         
         from streamlit_folium import st_folium
-        from shapely.geometry import Point
         
-        # A chave do mapa muda apenas quando UFs e municípios filtrados mudam
-        municipios_str = '_'.join(sorted(st.session_state.municipios_selecionados)) if st.session_state.municipios_selecionados else 'all'
-        mapa_key = f"mapa_{'_'.join(sorted(uf_sel))}_{municipios_str}"
+        # A chave do mapa muda apenas quando UFs mudam
+        mapa_key = f"mapa_{'_'.join(sorted(uf_sel))}"
         
-        # Renderizar mapa e capturar cliques no popup
-        map_data = st_folium(
+        # Renderizar mapa sem captura de cliques
+        st_folium(
             m, 
             width=None, 
             height=500, 
-            key=mapa_key,
-            returned_objects=["last_object_clicked_popup", "last_object_clicked"]
+            key=mapa_key
         )
-        
-        # Processar clique no popup
-        if map_data:
-            # Tentar capturar popup clicado
-            popup_data = map_data.get("last_object_clicked_popup")
-            click_data = map_data.get("last_object_clicked")
-            
-            if popup_data or click_data:
-                # Usar coordenadas do clique para encontrar município
-                lat = None
-                lng = None
-                
-                if click_data:
-                    lat = click_data.get("lat")
-                    lng = click_data.get("lng")
-                
-                if lat and lng:
-                    # Encontrar município clicado usando geometria
-                    ponto_clicado = Point(lng, lat)
-                    coluna_nome = 'mun_nome' if 'mun_nome' in gdf_filtrado.columns else 'NM_MUN'
-                    
-                    for idx, row in gdf_filtrado.iterrows():
-                        if row['geometry'].contains(ponto_clicado):
-                            municipio_clicado = row[coluna_nome]
-                            
-                            # Adicionar ao filtro se não estiver e se houve clique no popup
-                            if popup_data and municipio_clicado not in st.session_state.municipios_selecionados:
-                                st.session_state.municipios_selecionados.append(municipio_clicado)
-                                st.rerun()
-                            break
         
         st.markdown("---")
         
