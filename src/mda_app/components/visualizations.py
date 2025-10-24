@@ -80,14 +80,14 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
     # Criar um FeatureGroup para agrupar todos os municípios (não aparece no controle de camadas)
     municipios_layer = folium.FeatureGroup(name='Municípios', show=True, control=False)
     
-    # Adicionar polígonos ao mapa com ID único para capturar cliques
+    # Adicionar polígonos ao mapa
     for idx, row in gdf_filtrado.iterrows():
         color = get_color(row[criterio_sel], min_val, max_val, global_min, global_max)
         
         # Usar mun_nome se disponível, senão NM_MUN
         nome_municipio = row.get('mun_nome', row['NM_MUN'])
         
-        # Criar tooltip discreto com o nome do município
+        # Criar tooltip com o nome do município
         tooltip = folium.Tooltip(
             nome_municipio,
             sticky=False,
@@ -103,7 +103,7 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
             """
         )
         
-        # Adicionar ao FeatureGroup ao invés de adicionar diretamente ao mapa
+        # Adicionar GeoJson sem popup
         folium.GeoJson(
             row['geometry'],
             style_function=lambda feature, color=color: {
