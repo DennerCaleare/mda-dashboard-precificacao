@@ -75,6 +75,12 @@ def criar_filtros_sidebar(gdf):
         if 'municipios_selecionados' not in st.session_state:
             st.session_state.municipios_selecionados = []
         
+        # Botão para limpar seleção
+        if st.session_state.municipios_selecionados:
+            if st.sidebar.button("🗑️ Limpar municípios selecionados"):
+                st.session_state.municipios_selecionados = []
+                st.rerun()
+        
         # Multiselect com placeholder "Todos" e key fixa
         municipios_sel = st.sidebar.multiselect(
             "Filtro de Municípios",
@@ -85,8 +91,9 @@ def criar_filtros_sidebar(gdf):
             key="multiselect_municipios"
         )
         
-        # Atualizar session_state com a seleção atual do multiselect
-        st.session_state.municipios_selecionados = municipios_sel
+        # Atualizar session_state apenas se houver mudança real
+        if municipios_sel != st.session_state.municipios_selecionados:
+            st.session_state.municipios_selecionados = municipios_sel
         
         # Se nenhum município selecionado, usar todos
         if not municipios_sel:
@@ -238,39 +245,51 @@ predominante no município (aberta, intermediária e fechada) e nota específica
         
         from streamlit_folium import st_folium
         
-        # A chave é baseada apenas em critério e UFs para permitir atualização quando necessário
-        mapa_key = f"mapa_{criterio_sel}_{'_'.join(sorted(uf_sel))}"
+        # Inicializar estado do último clique para evitar loops
+        if 'last_clicked_lat' not in st.session_state:
+            st.session_state.last_clicked_lat = None
+            st.session_state.last_clicked_lng = None
         
-        # Renderizar mapa capturando cliques
+        # A chave do mapa muda apenas quando UFs mudam, não a cada clique
+        mapa_key = f"mapa_{'_'.join(sorted(uf_sel))}"
+        
+        # Renderizar mapa capturando cliques - returned_objects controla o que retorna
         output_map = st_folium(
             m, 
             width=None, 
             height=500, 
-            key=mapa_key
+            key=mapa_key,
+            returned_objects=["last_object_clicked"]  # Retorna apenas cliques
         )
         
-        # Processar clique no mapa
+        # Processar clique no mapa apenas se for um novo clique
         if output_map and output_map.get("last_object_clicked"):
-            # Obter coordenadas do clique
-            lat = output_map["last_object_clicked"]["lat"]
-            lng = output_map["last_object_clicked"]["lng"]
+            lat = output_map["last_object_clicked"].get("lat")
+            lng = output_map["last_object_clicked"].get("lng")
             
-            # Determinar qual coluna de nome usar
-            coluna_nome = 'mun_nome' if 'mun_nome' in gdf_filtrado.columns else 'NM_MUN'
-            
-            # Encontrar o município clicado
-            from shapely.geometry import Point
-            ponto_clicado = Point(lng, lat)
-            
-            for idx, row in gdf_filtrado.iterrows():
-                if row['geometry'].contains(ponto_clicado):
-                    municipio_clicado = row[coluna_nome]
-                    
-                    # Adicionar ao session_state se ainda não estiver
-                    if municipio_clicado not in st.session_state.municipios_selecionados:
-                        st.session_state.municipios_selecionados.append(municipio_clicado)
-                        st.rerun()
-                    break
+            # Verificar se é um clique novo (coordenadas diferentes do último)
+            if lat and lng and (lat != st.session_state.last_clicked_lat or lng != st.session_state.last_clicked_lng):
+                st.session_state.last_clicked_lat = lat
+                st.session_state.last_clicked_lng = lng
+                
+                # Determinar qual coluna de nome usar
+                coluna_nome = 'mun_nome' if 'mun_nome' in gdf_filtrado.columns else 'NM_MUN'
+                
+                # Encontrar o município clicado
+                from shapely.geometry import Point
+                ponto_clicado = Point(lng, lat)
+                
+                municipio_encontrado = False
+                for idx, row in gdf_filtrado.iterrows():
+                    if row['geometry'].contains(ponto_clicado):
+                        municipio_clicado = row[coluna_nome]
+                        
+                        # Adicionar ao session_state se ainda não estiver
+                        if municipio_clicado not in st.session_state.municipios_selecionados:
+                            st.session_state.municipios_selecionados.append(municipio_clicado)
+                            municipio_encontrado = True
+                            st.rerun()
+                        break
         
         st.markdown("---")
         
