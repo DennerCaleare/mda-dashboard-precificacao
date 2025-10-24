@@ -86,8 +86,9 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
         
         # Usar mun_nome se disponível, senão NM_MUN
         nome_municipio = row.get('mun_nome', row['NM_MUN'])
+        valor_criterio = row[criterio_sel]
         
-        # Criar tooltip com o nome do município
+        # Criar tooltip simples com o nome do município
         tooltip = folium.Tooltip(
             nome_municipio,
             sticky=False,
@@ -103,7 +104,20 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
             """
         )
         
-        # Adicionar GeoJson sem popup
+        # Criar popup com informações e identificador único
+        popup_html = f"""
+        <div style="font-family: Arial, sans-serif; min-width: 200px;">
+            <h4 style="margin: 0 0 10px 0; color: #0066cc;">{nome_municipio}</h4>
+            <p style="margin: 5px 0;"><strong>Nota Média:</strong> {valor_criterio:.2f}</p>
+            <p style="margin: 10px 0 5px 0; font-size: 11px; color: #666;">
+                Clique aqui para adicionar ao filtro
+            </p>
+        </div>
+        """
+        
+        popup = folium.Popup(popup_html, max_width=250)
+        
+        # Adicionar GeoJson com popup e tooltip
         folium.GeoJson(
             row['geometry'],
             style_function=lambda feature, color=color: {
@@ -117,7 +131,8 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
                 'color': '#0066cc',
                 'fillOpacity': 0.9
             },
-            tooltip=tooltip
+            tooltip=tooltip,
+            popup=popup
         ).add_to(municipios_layer)
     
     # Adicionar o FeatureGroup ao mapa

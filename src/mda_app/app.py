@@ -240,36 +240,36 @@ predominante no município (aberta, intermediária e fechada) e nota específica
         from streamlit_folium import st_folium
         from shapely.geometry import Point
         
-        # A chave do mapa muda apenas quando UFs mudam
-        mapa_key = f"mapa_{'_'.join(sorted(uf_sel))}"
+        # A chave do mapa muda apenas quando UFs e municípios filtrados mudam
+        municipios_str = '_'.join(sorted(st.session_state.municipios_selecionados)) if st.session_state.municipios_selecionados else 'all'
+        mapa_key = f"mapa_{'_'.join(sorted(uf_sel))}_{municipios_str}"
         
-        # Inicializar estado para rastrear último clique processado
-        if 'last_click_coords' not in st.session_state:
-            st.session_state.last_click_coords = None
-        
-        # Renderizar mapa e capturar cliques
+        # Renderizar mapa e capturar cliques no popup
         map_data = st_folium(
             m, 
             width=None, 
             height=500, 
             key=mapa_key,
-            returned_objects=["last_object_clicked"]
+            returned_objects=["last_object_clicked_popup", "last_object_clicked"]
         )
         
-        # Processar clique no mapa
-        if map_data and "last_object_clicked" in map_data:
-            click_data = map_data["last_object_clicked"]
+        # Processar clique no popup
+        if map_data:
+            # Tentar capturar popup clicado
+            popup_data = map_data.get("last_object_clicked_popup")
+            click_data = map_data.get("last_object_clicked")
             
-            if click_data:
-                lat = click_data.get("lat")
-                lng = click_data.get("lng")
+            if popup_data or click_data:
+                # Usar coordenadas do clique para encontrar município
+                lat = None
+                lng = None
                 
-                # Verificar se é um novo clique (evita loops de rerun)
-                current_coords = (lat, lng)
-                if lat and lng and current_coords != st.session_state.last_click_coords:
-                    st.session_state.last_click_coords = current_coords
-                    
-                    # Encontrar município clicado
+                if click_data:
+                    lat = click_data.get("lat")
+                    lng = click_data.get("lng")
+                
+                if lat and lng:
+                    # Encontrar município clicado usando geometria
                     ponto_clicado = Point(lng, lat)
                     coluna_nome = 'mun_nome' if 'mun_nome' in gdf_filtrado.columns else 'NM_MUN'
                     
@@ -277,8 +277,8 @@ predominante no município (aberta, intermediária e fechada) e nota específica
                         if row['geometry'].contains(ponto_clicado):
                             municipio_clicado = row[coluna_nome]
                             
-                            # Adicionar ao filtro se não estiver
-                            if municipio_clicado not in st.session_state.municipios_selecionados:
+                            # Adicionar ao filtro se não estiver e se houve clique no popup
+                            if popup_data and municipio_clicado not in st.session_state.municipios_selecionados:
                                 st.session_state.municipios_selecionados.append(municipio_clicado)
                                 st.rerun()
                             break
