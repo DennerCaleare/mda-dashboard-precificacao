@@ -94,54 +94,18 @@ def criar_filtros_sidebar(gdf):
     else:
         municipios_sel = []
     
-    # Critérios disponíveis
-    criterios_labels = {
-        "valor_medio": "Valor Médio",
-        "valor_mun_perim": "Valor por Perímetro", 
-        "valor_mun_area": "Valor por Área",
-        "nota_media": "Grau de Dificuldade Médio",
-        "nota_veg": "Vegetação",
-        "nota_area": "Área Média dos Lotes CAR",
-        "nota_relevo": "Relevo",
-        "nota_insalub": "Insalubridade (Dengue)",
-        "nota_insalub_2": "Insalubridade Ajustada",
-        "nota_total_q1": "Precipitação - Trimestre 1",
-        "nota_total_q2": "Precipitação - Trimestre 2", 
-        "nota_total_q3": "Precipitação - Trimestre 3",
-        "nota_total_q4": "Precipitação - Trimestre 4",
-    }
-    criterio_explicacao = {
-        "valor_medio": "Média entre valor por perímetro e valor por área.",
-        "nota_veg": "Grau de dificuldade relativo à vegetação do local. Calculada de acordo com a classe predominante no município (aberta, intermediária e fechada) e média de ocorrência de classe no intervalo.",
-        "nota_area": "Grau de dificuldade relativo à área média de lotes CAR na área do município. Acima de 35ha, entre 15 e 35ha, até 15ha, conforme máximas e mínimas.",
-        "nota_relevo": "Grau de dificuldade relativo ao relevo predominante no município.",
-        "nota_insalub": "Grau de dificuldade relativo à insalubridade (casos de dengue por município). Distribuída conforme máximos e mínimos gerais.",
-        "nota_insalub_2": "Grau de dificuldade relativo à insalubridade ajustada, incluindo incidência de ataques de animais peçonhentos.",
-        "valor_mun_perim": "Valor total do município em relação ao perímetro total de imóveis CAR, utilizando dados do Quadro II da Tabela de Rendimento e Preço do Anexo I da INSTRUÇÃO NORMATIVA SEI/INCRA.",
-        "valor_mun_area": "Valor total do município em relação à área georreferenciável.",
-        "nota_media": "Média das notas utilizada para composição do valor final.",
-        "nota_total_q1": "Grau de dificuldade total somada para o trimestre 1",
-        "nota_total_q2": "Grau de dificuldade total somada para o trimestre 2",
-        "nota_total_q3": "Grau de dificuldade total somada para o trimestre 3", 
-        "nota_total_q4": "Grau de dificuldade total somada para o trimestre 4"
-    }
+    # Critério fixo em nota_media para melhor performance
+    criterio_sel = "nota_media"
     
-    # Seleção de critério
-    criterio_sel = st.sidebar.selectbox(
-        "Selecione o critério para visualização", 
-        options=list(criterio_explicacao.keys()),
-        index=list(criterio_explicacao.keys()).index("nota_media")
-    )
-    
-    # Slider do critério selecionado
+    # Slider do critério (Grau de Dificuldade Médio)
     crit_min, crit_max = float(gdf[criterio_sel].min()), float(gdf[criterio_sel].max())
     crit_sel = st.sidebar.slider(
-        f"{criterios_labels[criterio_sel]}", 
+        "Grau de Dificuldade Médio", 
         crit_min, crit_max, 
         (crit_min, crit_max)
     )
     
-    return uf_sel, municipios_sel, criterio_sel, crit_sel, criterios_labels, criterio_explicacao
+    return uf_sel, municipios_sel, criterio_sel, crit_sel
 
 
 def aplicar_filtros(gdf, uf_sel, municipios_sel, criterio_sel, crit_sel):
@@ -170,7 +134,7 @@ def main():
     gdf = processar_dados_geograficos(gdf)
     
     # Criar filtros
-    uf_sel, municipios_sel, criterio_sel, crit_sel, criterios_labels, criterio_explicacao = criar_filtros_sidebar(gdf)
+    uf_sel, municipios_sel, criterio_sel, crit_sel = criar_filtros_sidebar(gdf)
     
     # Aplicar filtros
     gdf_filtrado = aplicar_filtros(gdf, uf_sel, municipios_sel, criterio_sel, crit_sel)
