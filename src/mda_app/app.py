@@ -241,21 +241,43 @@ predominante no município (aberta, intermediária e fechada) e nota específica
         from streamlit_folium import st_folium
         from shapely.geometry import Point
         
-        # Renderizar mapa e capturar cliques
+        # Inicializar controle de último clique
+        if 'ultimo_clique' not in st.session_state:
+            st.session_state.ultimo_clique = None
+        
+        # Renderizar mapa e capturar eventos
         map_data = st_folium(
             m, 
             width=None, 
             height=500,
-            returned_objects=["last_clicked"]
+            key="mapa_principal"
         )
         
-        # Processar clique no shapefile
-        if map_data and map_data.get("last_clicked"):
-            clicked = map_data["last_clicked"]
-            lat = clicked.get("lat")
-            lng = clicked.get("lng")
+        # Tentar diferentes formas de capturar clique
+        clicked_coords = None
+        
+        if map_data:
+            # Tentar last_clicked
+            if map_data.get("last_clicked"):
+                clicked_coords = (
+                    map_data["last_clicked"].get("lat"),
+                    map_data["last_clicked"].get("lng")
+                )
+            # Tentar last_object_clicked
+            elif map_data.get("last_object_clicked"):
+                clicked_coords = (
+                    map_data["last_object_clicked"].get("lat"),
+                    map_data["last_object_clicked"].get("lng")
+                )
+        
+        # Processar clique se houver coordenadas válidas
+        if clicked_coords and clicked_coords[0] and clicked_coords[1]:
+            lat, lng = clicked_coords
             
-            if lat and lng:
+            # Verificar se é um novo clique
+            if st.session_state.ultimo_clique != clicked_coords:
+                st.session_state.ultimo_clique = clicked_coords
+                
                 # Encontrar município clicado
                 ponto_clicado = Point(lng, lat)
                 coluna_nome = 'mun_nome' if 'mun_nome' in gdf_filtrado.columns else 'NM_MUN'
