@@ -304,16 +304,18 @@ predominante no município (aberta, intermediária e fechada) e nota específica
             # Múltiplos municípios - mostrar dados agregados
             st.markdown("<h3 style='text-align: center;'>Informações Adicionais</h3>", unsafe_allow_html=True)
         
-        # Uma única linha com todas as métricas (sempre 5 colunas)
-        col1, col2, col3, col4, col5 = st.columns(5)
-        
         if len(gdf_filtrado) == 1:
-            # Um município: mostra em colunas alternadas (1, 3, 5)
+            # Um município: mostra 4 cards
+            col1, col2, col3, col4 = st.columns(4)
             municipio_especifico = gdf_filtrado.iloc[0]
             
             if 'area_georef' in gdf_filtrado.columns:
                 area_fmt = f"{municipio_especifico['area_georef']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
                 col1.metric("Área total do Município (ha)", area_fmt)
+            
+            if 'area_car_total' in gdf_filtrado.columns:
+                area_car_fmt = f"{municipio_especifico['area_car_total']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+                col2.metric("Área CAR Total (ha)", area_car_fmt)
             
             if 'area_car_media' in gdf_filtrado.columns:
                 tamanho_fmt = f"{municipio_especifico['area_car_media']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
@@ -324,7 +326,7 @@ predominante no município (aberta, intermediária e fechada) e nota específica
                 if municipio_especifico['area_georef'] > 0:
                     valor_ha = municipio_especifico['valor_mun_area'] / municipio_especifico['area_georef']
                     valor_fmt = f"R$ {valor_ha:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                    col5.metric("Valor Médio/ha", valor_fmt)
+                    col4.metric("Valor Médio/ha", valor_fmt)
         else:
             # Múltiplos municípios: 5 colunas
             col1, col2, col3, col4, col5 = st.columns(5)
