@@ -304,117 +304,58 @@ predominante no município (aberta, intermediária e fechada) e nota específica
             # Múltiplos municípios - mostrar dados agregados
             st.markdown("<h3 style='text-align: center;'>Informações Adicionais</h3>", unsafe_allow_html=True)
         
-        # Linha 1: 5 colunas
+        # Uma única linha com todas as métricas (sempre 5 colunas)
         col1, col2, col3, col4, col5 = st.columns(5)
         
         if len(gdf_filtrado) == 1:
-            # Dados do município específico
+            # Um município: mostra em colunas alternadas (1, 3, 5)
             municipio_especifico = gdf_filtrado.iloc[0]
             
-            if 'area_georef' in municipio_especifico:
+            if 'area_georef' in gdf_filtrado.columns:
                 area_fmt = f"{municipio_especifico['area_georef']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
                 col1.metric("Área total do Município (ha)", area_fmt)
             
-            if 'perimetro_total_car' in municipio_especifico:
-                perimetro_fmt = f"{municipio_especifico['perimetro_total_car']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                col2.metric("Perímetro Georreferencial do Município (km)", perimetro_fmt)
-            
-            if 'area_car_media' in municipio_especifico:
+            if 'area_car_media' in gdf_filtrado.columns:
                 tamanho_fmt = f"{municipio_especifico['area_car_media']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
                 col3.metric("Tamanho Médio Imóvel CAR (ha)", tamanho_fmt)
             
-            if 'perimetro_medio_car' in municipio_especifico:
-                perimetro_medio_fmt = f"{municipio_especifico['perimetro_medio_car']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                col4.metric("Perímetro Médio Imóvel CAR (km)", perimetro_medio_fmt)
-            
             # Valor médio por hectare
-            if 'valor_mun_area' in municipio_especifico and 'area_georef' in municipio_especifico:
+            if 'valor_mun_area' in gdf_filtrado.columns and 'area_georef' in gdf_filtrado.columns:
                 if municipio_especifico['area_georef'] > 0:
                     valor_ha = municipio_especifico['valor_mun_area'] / municipio_especifico['area_georef']
                     valor_fmt = f"R$ {valor_ha:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
                     col5.metric("Valor Médio/ha", valor_fmt)
         else:
-            # Dados agregados
+            # Múltiplos municípios: 5 colunas
+            col1, col2, col3, col4, col5 = st.columns(5)
+            
             if 'area_georef' in gdf_filtrado.columns:
                 area_total = gdf_filtrado['area_georef'].sum()
                 area_fmt = f"{area_total:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
                 col1.metric("Área Total (ha)", area_fmt)
             
-            if 'perimetro_total_car' in gdf_filtrado.columns:
-                perimetro_total = gdf_filtrado['perimetro_total_car'].sum()
-                perimetro_fmt = f"{perimetro_total:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                col2.metric("Perímetro Total Georreferenciável (km)", perimetro_fmt)
-            
             if 'area_car_media' in gdf_filtrado.columns:
                 tamanho_medio = gdf_filtrado['area_car_media'].mean()
                 tamanho_fmt = f"{tamanho_medio:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                col3.metric("Tamanho Médio Imóvel CAR (ha)", tamanho_fmt)
-            
-            if 'perimetro_medio_car' in gdf_filtrado.columns:
-                perimetro_medio = gdf_filtrado['perimetro_medio_car'].mean()
-                perimetro_medio_fmt = f"{perimetro_medio:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                col4.metric("Perímetro Médio Imóvel CAR (km)", perimetro_medio_fmt)
+                col2.metric("Tamanho Médio Imóvel CAR (ha)", tamanho_fmt)
             
             # Valor médio por hectare
             if 'valor_mun_area' in gdf_filtrado.columns and 'area_georef' in gdf_filtrado.columns:
                 gdf_temp = gdf_filtrado[gdf_filtrado['area_georef'] > 0].copy()
                 if len(gdf_temp) > 0:
                     gdf_temp['valor_por_ha'] = gdf_temp['valor_mun_area'] / gdf_temp['area_georef']
+                    
                     valor_medio_ha = gdf_temp['valor_por_ha'].mean()
                     valor_medio_fmt = f"R$ {valor_medio_ha:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                    col5.metric("Valor Médio/ha", valor_medio_fmt)
-        
-        # Linha 2: 5 colunas
-        col1, col2, col3, col4, col5 = st.columns(5)
-        
-        if len(gdf_filtrado) == 1:
-            # Dados do município específico
-            municipio_especifico = gdf_filtrado.iloc[0]
-            
-            # Valor médio por quilômetro
-            if 'valor_mun_perim' in municipio_especifico and 'perimetro_total_car' in municipio_especifico:
-                if municipio_especifico['perimetro_total_car'] > 0:
-                    valor_km = municipio_especifico['valor_mun_perim'] / municipio_especifico['perimetro_total_car']
-                    valor_km_fmt = f"R$ {valor_km:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                    col1.metric("Valor Médio/km", valor_km_fmt)
-        else:
-            # Dados agregados
-            # Valor médio por quilômetro
-            if 'valor_mun_perim' in gdf_filtrado.columns and 'perimetro_total_car' in gdf_filtrado.columns:
-                gdf_temp = gdf_filtrado[gdf_filtrado['perimetro_total_car'] > 0].copy()
-                if len(gdf_temp) > 0:
-                    gdf_temp['valor_por_km'] = gdf_temp['valor_mun_perim'] / gdf_temp['perimetro_total_car']
-                    valor_medio_km = gdf_temp['valor_por_km'].mean()
-                    valor_medio_km_fmt = f"R$ {valor_medio_km:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                    col1.metric("Valor Médio/km", valor_medio_km_fmt)
-            
-            # Valores Min/Max por hectare
-            if 'valor_mun_area' in gdf_filtrado.columns and 'area_georef' in gdf_filtrado.columns:
-                gdf_temp = gdf_filtrado[gdf_filtrado['area_georef'] > 0].copy()
-                if len(gdf_temp) > 0:
-                    gdf_temp['valor_por_ha'] = gdf_temp['valor_mun_area'] / gdf_temp['area_georef']
+                    col3.metric("Valor Médio/ha", valor_medio_fmt)
                     
                     valor_min = gdf_temp['valor_por_ha'].min()
                     valor_min_fmt = f"R$ {valor_min:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                    col2.metric("Valor Mínimo/ha", valor_min_fmt)
+                    col4.metric("Valor Mínimo/ha", valor_min_fmt)
                     
                     valor_max = gdf_temp['valor_por_ha'].max()
                     valor_max_fmt = f"R$ {valor_max:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                    col3.metric("Valor Máximo/ha", valor_max_fmt)
-            
-            # Valores Min/Max por quilômetro
-            if 'valor_mun_perim' in gdf_filtrado.columns and 'perimetro_total_car' in gdf_filtrado.columns:
-                gdf_temp = gdf_filtrado[gdf_filtrado['perimetro_total_car'] > 0].copy()
-                if len(gdf_temp) > 0:
-                    gdf_temp['valor_por_km'] = gdf_temp['valor_mun_perim'] / gdf_temp['perimetro_total_car']
-                    
-                    valor_min_km = gdf_temp['valor_por_km'].min()
-                    valor_min_km_fmt = f"R$ {valor_min_km:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                    col4.metric("Valor Mínimo/km", valor_min_km_fmt)
-                    
-                    valor_max_km = gdf_temp['valor_por_km'].max()
-                    valor_max_km_fmt = f"R$ {valor_max_km:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                    col5.metric("Valor Máximo/km", valor_max_km_fmt)
+                    col5.metric("Valor Máximo/ha", valor_max_fmt)
         
         st.markdown("---")
         
