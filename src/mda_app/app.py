@@ -309,8 +309,8 @@ predominante no município (aberta, intermediária e fechada) e nota específica
             col1, col2, col3, col4 = st.columns(4)
             municipio_especifico = gdf_filtrado.iloc[0]
             
-            if 'area_georef' in gdf_filtrado.columns:
-                area_fmt = f"{municipio_especifico['area_georef']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            if 'area_municip' in gdf_filtrado.columns:
+                area_fmt = f"{municipio_especifico['area_municip']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
                 col1.metric("Área total do Município (ha)", area_fmt)
             
             if 'area_car_total' in gdf_filtrado.columns:
@@ -331,8 +331,8 @@ predominante no município (aberta, intermediária e fechada) e nota específica
             # Múltiplos municípios: 5 colunas
             col1, col2, col3, col4, col5 = st.columns(5)
             
-            if 'area_georef' in gdf_filtrado.columns:
-                area_total = gdf_filtrado['area_georef'].sum()
+            if 'area_municip' in gdf_filtrado.columns:
+                area_total = gdf_filtrado['area_municip'].sum()
                 area_fmt = f"{area_total:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
                 col1.metric("Área Total (ha)", area_fmt)
             
