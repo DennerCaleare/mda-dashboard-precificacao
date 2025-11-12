@@ -18,6 +18,10 @@ def processar_dados_geograficos(gdf):
     """Processar dados geográficos."""
     gdf = gdf.to_crs(epsg=4326)
     gdf['nota_insalub_2'] = gdf['nota_insalub_2'].apply(lambda x: 1 if x < 1 else x)
+    
+    # Calcular média entre nota_insalub e nota_insalub_2
+    gdf['nota_insalub_media'] = (gdf['nota_insalub'] + gdf['nota_insalub_2']) / 2
+    
     gdf['valor_medio_car'] = np.where(
         gdf['area_car_total'] != 0,
         ((gdf['area_car_total'] / gdf['area_georef']) * gdf['valor_mun_area'])/gdf['num_imoveis'],

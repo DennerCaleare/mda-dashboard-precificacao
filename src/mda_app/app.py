@@ -627,14 +627,17 @@ predominante no município (aberta, intermediária e fechada) e nota específica
         st.markdown("<h3 style='text-align: center;'>Composição Média dos Graus de Dificuldade por UF</h3>", unsafe_allow_html=True)
 
         # Selecionar colunas principais de notas
-        colunas_notas = ["nota_veg", "nota_area", "nota_relevo", "nota_insalub_2",
-                        "nota_total_q1", "nota_total_q2", "nota_total_q3", "nota_total_q4"]
+        colunas_notas = ["nota_veg", "nota_area", "nota_relevo", "nota_insalub_media",
+                        "nota_p_q1", "nota_p_q2", "nota_p_q3", "nota_p_q4"]
         colunas_presentes = [c for c in colunas_notas if c in gdf_filtrado.columns]
 
         if len(colunas_presentes) >= 3:
+            # Filtrar apenas por UF (ignorando filtro de município para este gráfico)
+            gdf_por_uf = gdf[gdf["SIGLA_UF"].isin(uf_sel)]
+            
             # Calcular média das notas por UF
             df_uf = (
-                gdf_filtrado.groupby("SIGLA_UF")[colunas_presentes]
+                gdf_por_uf.groupby("SIGLA_UF")[colunas_presentes]
                 .mean()
                 .reset_index()
             )
@@ -645,23 +648,23 @@ predominante no município (aberta, intermediária e fechada) e nota específica
 
             # Dicionário de legendas amigáveis (ordem invertida para legenda)
             legendas = {
-                "nota_total_q1": "Clima T1",
-                "nota_total_q2": "Clima T2",
-                "nota_total_q3": "Clima T3",
-                "nota_total_q4": "Clima T4",
-                "nota_insalub_2": "Insalubridade",
+                "nota_p_q1": "Clima T1",
+                "nota_p_q2": "Clima T2",
+                "nota_p_q3": "Clima T3",
+                "nota_p_q4": "Clima T4",
+                "nota_insalub_media": "Insalubridade",
                 "nota_relevo": "Relevo",
-                "nota_area": "Área CAR",
+                "nota_area": "Área",
                 "nota_veg": "Vegetação",
             }
 
             # Paleta suave consistente com o restante do app
             cores = {
-                "nota_total_q1": "#6C9BCF",
-                "nota_total_q2": "#8BB8E8", 
-                "nota_total_q3": "#A9CCE3",
-                "nota_total_q4": "#C5DEDD",
-                "nota_insalub_2": "#9AD0EC",
+                "nota_p_q1": "#6C9BCF",
+                "nota_p_q2": "#8BB8E8", 
+                "nota_p_q3": "#A9CCE3",
+                "nota_p_q4": "#C5DEDD",
+                "nota_insalub_media": "#9AD0EC",
                 "nota_relevo": "#C9E4F3",
                 "nota_area": "#A3C4BC",
                 "nota_veg": "#F2E8CF"
@@ -671,8 +674,8 @@ predominante no município (aberta, intermediária e fechada) e nota específica
             fig_empilhado = go.Figure()
 
             # Adicionar traços na ordem da legenda (invertida)
-            ordem_legenda = ["nota_total_q1", "nota_total_q2", "nota_total_q3", "nota_total_q4",
-                            "nota_insalub_2", "nota_relevo", "nota_area", "nota_veg"]
+            ordem_legenda = ["nota_p_q1", "nota_p_q2", "nota_p_q3", "nota_p_q4",
+                            "nota_insalub_media", "nota_relevo", "nota_area", "nota_veg"]
             
             # Filtrar apenas colunas presentes
             ordem_legenda = [col for col in ordem_legenda if col in colunas_presentes]
