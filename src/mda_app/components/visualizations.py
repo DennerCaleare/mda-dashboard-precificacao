@@ -7,33 +7,59 @@ import plotly.express as px
 from branca.element import Template, MacroElement
 
 
-def get_color(value, min_val, max_val, global_min=0, global_max=60):
+def get_color(value, min_val, max_val, global_min=6, global_max=60):
     """Gerar cor baseada no valor normalizado.
     
     Args:
         value: Valor a ser colorido
-        min_val: Valor mínimo no conjunto filtrado
-        max_val: Valor máximo no conjunto filtrado
-        global_min: Valor mínimo absoluto da escala (padrão: 0)
+        min_val: Valor mínimo no conjunto filtrado (não usado, mantido por compatibilidade)
+        max_val: Valor máximo no conjunto filtrado (não usado, mantido por compatibilidade)
+        global_min: Valor mínimo absoluto da escala (padrão: 6)
         global_max: Valor máximo absoluto da escala (padrão: 60)
     """
-    # Se min e max são iguais, usar escala global
-    if max_val == min_val or (max_val - min_val) < 0.01:
-        norm = (value - global_min) / (global_max - global_min)
-    else:
-        norm = (value - min_val) / (max_val - min_val)
+    # Sempre usar escala fixa de 6 a 60
+    norm = (value - global_min) / (global_max - global_min)
     
     # Garantir que norm está entre 0 e 1
     norm = max(0, min(1, norm))
     
-    if norm < 0.5:
+    # Gradiente otimizado para diferenciar mais no intervalo 10-40 (norm ~0.07 a 0.63)
+    # Escala: 6=0%, 10=7%, 20=26%, 30=44%, 40=63%, 50=81%, 60=100%
+    if norm < 0.07:
+        # Azul escuro (6-10)
+        factor = norm / 0.07
         r = 0
-        g = int(255 * (2 * norm))
-        b = int(255 * (1 - 2 * norm))
+        g = int(100 + 55 * factor)
+        b = 255
+    elif norm < 0.26:
+        # Azul para Ciano (10-20)
+        factor = (norm - 0.07) / 0.19
+        r = 0
+        g = int(155 + 100 * factor)
+        b = 255
+    elif norm < 0.44:
+        # Ciano para Verde-água (20-30)
+        factor = (norm - 0.26) / 0.18
+        r = int(0 + 100 * factor)
+        g = 255
+        b = int(255 - 155 * factor)
+    elif norm < 0.63:
+        # Verde para Amarelo-verde (30-40)
+        factor = (norm - 0.44) / 0.19
+        r = int(100 + 155 * factor)
+        g = 255
+        b = int(100 - 100 * factor)
+    elif norm < 0.81:
+        # Amarelo para Laranja (40-50)
+        factor = (norm - 0.63) / 0.18
+        r = 255
+        g = int(255 - 100 * factor)
+        b = 0
     else:
-        norm2 = 2 * (norm - 0.5)
-        r = int(255 * norm2)
-        g = int(255 * (1 - norm2))
+        # Laranja para Vermelho (50-60)
+        factor = (norm - 0.81) / 0.19
+        r = 255
+        g = int(155 - 155 * factor)
         b = 0
     
     return f'#{r:02x}{g:02x}{b:02x}'
@@ -133,27 +159,52 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
     gradient_colors = []
     for i in range(num_steps):
         norm = i / (num_steps - 1)
-        if norm < 0.5:
+        
+        # Gradiente otimizado para diferenciar mais no intervalo 10-40
+        if norm < 0.07:
+            # Azul escuro (6-10)
+            factor = norm / 0.07
             r = 0
-            g = int(255 * (2 * norm))
-            b = int(255 * (1 - 2 * norm))
-        else:
-            norm2 = 2 * (norm - 0.5)
-            r = int(255 * norm2)
-            g = int(255 * (1 - norm2))
+            g = int(100 + 55 * factor)
+            b = 255
+        elif norm < 0.26:
+            # Azul para Ciano (10-20)
+            factor = (norm - 0.07) / 0.19
+            r = 0
+            g = int(155 + 100 * factor)
+            b = 255
+        elif norm < 0.44:
+            # Ciano para Verde-água (20-30)
+            factor = (norm - 0.26) / 0.18
+            r = int(0 + 100 * factor)
+            g = 255
+            b = int(255 - 155 * factor)
+        elif norm < 0.63:
+            # Verde para Amarelo-verde (30-40)
+            factor = (norm - 0.44) / 0.19
+            r = int(100 + 155 * factor)
+            g = 255
+            b = int(100 - 100 * factor)
+        elif norm < 0.81:
+            # Amarelo para Laranja (40-50)
+            factor = (norm - 0.63) / 0.18
+            r = 255
+            g = int(255 - 100 * factor)
             b = 0
+        else:
+            # Laranja para Vermelho (50-60)
+            factor = (norm - 0.81) / 0.19
+            r = 255
+            g = int(155 - 155 * factor)
+            b = 0
+        
         gradient_colors.append(f'#{r:02x}{g:02x}{b:02x}')
     
     gradient_str = ', '.join(gradient_colors)
     
-    # Determinar valores para a legenda
-    # Se há apenas um município ou valores muito próximos, usar escala global
-    if max_val == min_val or (max_val - min_val) < 0.01:
-        legend_min = global_min
-        legend_max = global_max
-    else:
-        legend_min = min_val
-        legend_max = max_val
+    # Usar sempre a escala fixa de 6 a 60 para a legenda
+    legend_min = 6
+    legend_max = 60
     
     legend_html = f'''
     <div style="position: fixed; 
