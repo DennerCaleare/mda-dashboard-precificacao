@@ -449,20 +449,20 @@ predominante no município (aberta, intermediária e fechada) e nota específica
                 st.plotly_chart(fig_barras, use_container_width=True)
         
         with col_grafico2:
-            st.markdown("<h4 style='text-align: center;'>Percentual de Área Georreferenciada</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center;'>Percentual de Área Georreferenciável</h4>", unsafe_allow_html=True)
             
-            # Calcular percentagem de área já georreferenciada (inverso da área georreferenciável)
+            # Calcular percentagem de área georreferenciável da coluna percent_area_georef
             if len(gdf_filtrado) == 1:
                 # Para município individual - usar a coluna percent_area_georef
                 municipio_especifico = gdf_filtrado.iloc[0]
                 if 'percent_area_georef' in municipio_especifico:
-                    percentual = 100.0 - float(municipio_especifico['percent_area_georef'])
+                    percentual = float(municipio_especifico['percent_area_georef'])
                 else:
                     percentual = 0.0
             else:
                 # Para agregado - média dos percentuais
                 if 'percent_area_georef' in gdf_filtrado.columns:
-                    percentual = 100.0 - float(gdf_filtrado['percent_area_georef'].mean())
+                    percentual = float(gdf_filtrado['percent_area_georef'].mean())
                 else:
                     percentual = 0.0
             
@@ -487,46 +487,46 @@ predominante no município (aberta, intermediária e fechada) e nota específica
                     'borderwidth': 2,
                     'bordercolor': "gray",
                     'steps': [
-                        {'range': [0, 2.5], 'color': '#e74c3c'},
-                        {'range': [2.5, 5], 'color': '#e96a30'},
-                        {'range': [5, 7.5], 'color': '#ec8e2c'},
-                        {'range': [7.5, 10], 'color': '#f0a634'},
-                        {'range': [10, 12.5], 'color': '#f2b446'},
-                        {'range': [12.5, 15], 'color': '#f4c258'},
-                        {'range': [15, 17.5], 'color': '#f6d06a'},
-                        {'range': [17.5, 20], 'color': '#f7d87c'},
-                        {'range': [20, 22.5], 'color': '#f9e18e'},
-                        {'range': [22.5, 25], 'color': '#fae9a0'},
-                        {'range': [25, 27.5], 'color': '#f9f2b8'},
-                        {'range': [27.5, 30], 'color': '#f8f5c4'},
-                        {'range': [30, 32.5], 'color': '#eff4bf'},
-                        {'range': [32.5, 35], 'color': '#e7f3bb'},
-                        {'range': [35, 37.5], 'color': '#def2b6'},
-                        {'range': [37.5, 40], 'color': '#d6f0b2'},
-                        {'range': [40, 42.5], 'color': '#cdefad'},
-                        {'range': [42.5, 45], 'color': '#c5eda9'},
-                        {'range': [45, 47.5], 'color': '#bceba4'},
-                        {'range': [47.5, 50], 'color': '#b4e9a0'},
-                        {'range': [50, 52.5], 'color': '#abe79b'},
-                        {'range': [52.5, 55], 'color': '#a3e597'},
-                        {'range': [55, 57.5], 'color': '#9ae292'},
-                        {'range': [57.5, 60], 'color': '#92e08e'},
-                        {'range': [60, 62.5], 'color': '#89de89'},
-                        {'range': [62.5, 65], 'color': '#81db85'},
-                        {'range': [65, 67.5], 'color': '#78d880'},
-                        {'range': [67.5, 70], 'color': '#70d57c'},
-                        {'range': [70, 72.5], 'color': '#67d277'},
-                        {'range': [72.5, 75], 'color': '#5fcf73'},
-                        {'range': [75, 77.5], 'color': '#56cc6e'},
-                        {'range': [77.5, 80], 'color': '#4ec96a'},
-                        {'range': [80, 82.5], 'color': '#44c565'},
-                        {'range': [82.5, 85], 'color': '#3dc261'},
-                        {'range': [85, 87.5], 'color': '#36bf5c'},
-                        {'range': [87.5, 90], 'color': '#31bc5a'},
-                        {'range': [90, 92.5], 'color': '#2eb85b'},
-                        {'range': [92.5, 95], 'color': '#2cb55d'},
-                        {'range': [95, 97.5], 'color': '#29b15e'},
-                        {'range': [97.5, 100], 'color': '#27ae60'}
+                        {'range': [0, 2.5], 'color': '#27ae60'},
+                        {'range': [2.5, 5], 'color': '#29b15e'},
+                        {'range': [5, 7.5], 'color': '#2cb55d'},
+                        {'range': [7.5, 10], 'color': '#2eb85b'},
+                        {'range': [10, 12.5], 'color': '#31bc5a'},
+                        {'range': [12.5, 15], 'color': '#36bf5c'},
+                        {'range': [15, 17.5], 'color': '#3dc261'},
+                        {'range': [17.5, 20], 'color': '#44c565'},
+                        {'range': [20, 22.5], 'color': '#4ec96a'},
+                        {'range': [22.5, 25], 'color': '#56cc6e'},
+                        {'range': [25, 27.5], 'color': '#5fcf73'},
+                        {'range': [27.5, 30], 'color': '#67d277'},
+                        {'range': [30, 32.5], 'color': '#70d57c'},
+                        {'range': [32.5, 35], 'color': '#78d880'},
+                        {'range': [35, 37.5], 'color': '#81db85'},
+                        {'range': [37.5, 40], 'color': '#89de89'},
+                        {'range': [40, 42.5], 'color': '#92e08e'},
+                        {'range': [42.5, 45], 'color': '#9ae292'},
+                        {'range': [45, 47.5], 'color': '#a3e597'},
+                        {'range': [47.5, 50], 'color': '#abe79b'},
+                        {'range': [50, 52.5], 'color': '#b4e9a0'},
+                        {'range': [52.5, 55], 'color': '#bceba4'},
+                        {'range': [55, 57.5], 'color': '#c5eda9'},
+                        {'range': [57.5, 60], 'color': '#cdefad'},
+                        {'range': [60, 62.5], 'color': '#d6f0b2'},
+                        {'range': [62.5, 65], 'color': '#def2b6'},
+                        {'range': [65, 67.5], 'color': '#e7f3bb'},
+                        {'range': [67.5, 70], 'color': '#eff4bf'},
+                        {'range': [70, 72.5], 'color': '#f8f5c4'},
+                        {'range': [72.5, 75], 'color': '#f9f2b8'},
+                        {'range': [75, 77.5], 'color': '#fae9a0'},
+                        {'range': [77.5, 80], 'color': '#f9e18e'},
+                        {'range': [80, 82.5], 'color': '#f7d87c'},
+                        {'range': [82.5, 85], 'color': '#f6d06a'},
+                        {'range': [85, 87.5], 'color': '#f4c258'},
+                        {'range': [87.5, 90], 'color': '#f2b446'},
+                        {'range': [90, 92.5], 'color': '#f0a634'},
+                        {'range': [92.5, 95], 'color': '#ec8e2c'},
+                        {'range': [95, 97.5], 'color': '#e96a30'},
+                        {'range': [97.5, 100], 'color': '#e74c3c'}
                     ],
                     'threshold': {
                         'line': {'color': "darkblue", 'width': 4},
