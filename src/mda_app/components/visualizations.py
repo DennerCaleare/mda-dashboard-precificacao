@@ -23,43 +23,20 @@ def get_color(value, min_val, max_val, global_min=6, global_max=60):
     # Garantir que norm está entre 0 e 1
     norm = max(0, min(1, norm))
     
-    # Gradiente otimizado para diferenciar mais no intervalo 10-40 (norm ~0.07 a 0.63)
-    # Escala: 6=0%, 10=7%, 20=26%, 30=44%, 40=63%, 50=81%, 60=100%
-    if norm < 0.07:
-        # Azul escuro (6-10)
-        factor = norm / 0.07
-        r = 0
-        g = int(100 + 55 * factor)
-        b = 255
-    elif norm < 0.26:
-        # Azul para Ciano (10-20)
-        factor = (norm - 0.07) / 0.19
-        r = 0
-        g = int(155 + 100 * factor)
-        b = 255
-    elif norm < 0.44:
-        # Ciano para Verde-água (20-30)
-        factor = (norm - 0.26) / 0.18
-        r = int(0 + 100 * factor)
-        g = 255
-        b = int(255 - 155 * factor)
-    elif norm < 0.63:
-        # Verde para Amarelo-verde (30-40)
-        factor = (norm - 0.44) / 0.19
-        r = int(100 + 155 * factor)
-        g = 255
-        b = int(100 - 100 * factor)
-    elif norm < 0.81:
-        # Amarelo para Laranja (40-50)
-        factor = (norm - 0.63) / 0.18
-        r = 255
-        g = int(255 - 100 * factor)
-        b = 0
+    # Novo gradiente: Verde escuro (#2a9104) → Amarelo (#ffe100) → Vermelho (#ff0000)
+    # 0% = rgb(42, 145, 4), 40% = rgb(255, 225, 0), 100% = rgb(255, 0, 0)
+    
+    if norm <= 0.40:
+        # Verde escuro para Amarelo (0-40%)
+        factor = norm / 0.40
+        r = int(42 + (255 - 42) * factor)
+        g = int(145 + (225 - 145) * factor)
+        b = int(4 * (1 - factor))
     else:
-        # Laranja para Vermelho (50-60)
-        factor = (norm - 0.81) / 0.19
+        # Amarelo para Vermelho (40-100%)
+        factor = (norm - 0.40) / 0.60
         r = 255
-        g = int(155 - 155 * factor)
+        g = int(225 * (1 - factor))
         b = 0
     
     return f'#{r:02x}{g:02x}{b:02x}'
@@ -160,42 +137,18 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
     for i in range(num_steps):
         norm = i / (num_steps - 1)
         
-        # Gradiente otimizado para diferenciar mais no intervalo 10-40
-        if norm < 0.07:
-            # Azul escuro (6-10)
-            factor = norm / 0.07
-            r = 0
-            g = int(100 + 55 * factor)
-            b = 255
-        elif norm < 0.26:
-            # Azul para Ciano (10-20)
-            factor = (norm - 0.07) / 0.19
-            r = 0
-            g = int(155 + 100 * factor)
-            b = 255
-        elif norm < 0.44:
-            # Ciano para Verde-água (20-30)
-            factor = (norm - 0.26) / 0.18
-            r = int(0 + 100 * factor)
-            g = 255
-            b = int(255 - 155 * factor)
-        elif norm < 0.63:
-            # Verde para Amarelo-verde (30-40)
-            factor = (norm - 0.44) / 0.19
-            r = int(100 + 155 * factor)
-            g = 255
-            b = int(100 - 100 * factor)
-        elif norm < 0.81:
-            # Amarelo para Laranja (40-50)
-            factor = (norm - 0.63) / 0.18
-            r = 255
-            g = int(255 - 100 * factor)
-            b = 0
+        # Novo gradiente: Verde escuro (#2a9104) → Amarelo (#ffe100) → Vermelho (#ff0000)
+        if norm <= 0.40:
+            # Verde escuro para Amarelo (0-40%)
+            factor = norm / 0.40
+            r = int(42 + (255 - 42) * factor)
+            g = int(145 + (225 - 145) * factor)
+            b = int(4 * (1 - factor))
         else:
-            # Laranja para Vermelho (50-60)
-            factor = (norm - 0.81) / 0.19
+            # Amarelo para Vermelho (40-100%)
+            factor = (norm - 0.40) / 0.60
             r = 255
-            g = int(155 - 155 * factor)
+            g = int(225 * (1 - factor))
             b = 0
         
         gradient_colors.append(f'#{r:02x}{g:02x}{b:02x}')
