@@ -2,6 +2,10 @@
 
 Dashboard interativo para análise de precificação de áreas de georreferenciamento desenvolvido para o Ministério do Desenvolvimento Agrário.
 
+## 🚀 Versão Online
+
+[Ver Dashboard em Produção](https://mda-dashboard-precificacao-main-main-py.streamlit.app)
+
 ## Descrição
 
 Este projeto apresenta um dashboard desenvolvido em Streamlit para análise e visualização de dados de precificação de serviços de georreferenciamento em municípios brasileiros. A ferramenta permite análise espacial, estatística e temporal dos critérios que compõem a precificação de áreas.
