@@ -1,123 +1,141 @@
-# MDA Dashboard - Precificação de Áreas 🗺️
+# 🗺️ MDA Dashboard - Precificação de Áreas
+## Prototipagem que Virou Padrão Federal
 
-> Dashboard interativo para análise e precificação de áreas de georreferenciamento desenvolvido para o Ministério do Desenvolvimento Agrário.
+> **Dashboard que serviu de base para o site oficial do MDA (Ministério do Desenvolvimento Agrário). Desenvolvido como protótipo, a solução foi to tal adotada pelos devs do governo para implementação em escala.**
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://mda-dashboard-precificacao.streamlit.app/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![MDA - Gov](https://img.shields.io/badge/Usado%20por-MDA%20Federal-red.svg)](#)
 
-## 🚀 Versão Online
+## 🚀 Acesso Rápido
 
-**Acesse o dashboard em tempo real:**
+**Veja em ação:** https://mda-dashboard-precificacao.streamlit.app/
 
-👉 **[MDA Dashboard - Precificação](https://mda-dashboard-precificacao.streamlit.app/)**
+**Desenvolvedor:** Denner Caleare | [GitHub](https://github.com/DennerCaleare) | [LinkedIn](https://linkedin.com/in/dennercaleare)
 
-## 📋 Sobre o Projeto
+---
 
-Sistema completo de análise e visualização de dados para precificação de serviços de georreferenciamento em municípios brasileiros. A plataforma integra dados de múltiplas fontes (MapBiomas, SRTM, DataSUS, INMET) para calcular valores de referência baseados em critérios técnicos.
+## 📚 O Desafio do MDA
 
-### ✨ Funcionalidades Principais
+O Ministério do Desenvolvimento Agrário precisava de uma forma de:
+- 🗺️ Visualizar custos de georreferenciamento por região
+- 📊 Tomar decisões estratégicas baseadas em dados geográficos
+- 📋 Identificar áreas críticas vs. áreas favoraéveis
+- 📤 Apresentar dados de forma intuitiva
 
-- 📍 **Mapa Interativo**: Visualização geoespacial com filtros por estado e município
-- 📊 **10 Indicadores Estatísticos**: Área total, perímetro, valores médios, mínimos e máximos
-- 📈 **Análise Temporal**: Visualização trimestral de notas e valores
-- 🎯 **Medidor de Performance**: Percentual de área georreferenciável
-- 🔄 **Filtros Dinâmicos**: Seleção granular por UF, município e critérios
-- 📑 **Tabelas Detalhadas**: Exportação de dados completos
-- 📱 **Interface Responsiva**: Funciona em desktop e mobile
+## ✨ A Solução que Entreguei
 
-## 🏗️ Critérios de Precificação
+**Dashboard interativo com 6 critérios de precificação:**
 
-| Critério | Fonte de Dados | Descrição |
-|----------|----------------|----------|
-| **Vegetação** | MapBiomas (10m) | Classificação de cobertura vegetal predominante |
-| **Relevo** | SRTM/Google Earth Engine | Tipologia de Lepsch (1983) |
-| **Insalubridade** | DataSUS | Dengue e ataques de animais peçonhentos |
-| **Clima** | INMET/BigQuery (25 anos) | Séries históricas com aplicação de krigagem |
-| **Área** | CAR | Média de áreas de lotes por município |
-| **Acesso** | Vias rodoviárias | Disponibilidade de vias de acesso |
+### 🗺️ Visualização Geográfica
+- Mapa interativo mostrando custos por múnicipío
+- Cores degradadas indicando faixas de valor
+- Filtros por Estado e Múnicipo
+- Zoom dinâmico e tooltips informativos
 
-## 💰 Tabela de Valores
+### 📊 Análise Multidimensional
+- 10+ indicadores principais
+- Área total e perímetro
+- Valores médios, mínimos e máximos
+- Análise por trimestre
+- Medidor de área georreferenciável
 
-```
-≤ 15 pontos    →  R$ 49,83/ha
-16-25 pontos   →  R$ 59,80/ha
-26-35 pontos   →  R$ 104,78/ha
-36-45 pontos   →  R$ 134,88/ha
-46-55 pontos   →  R$ 164,95/ha
-> 55 pontos    →  R$ 202,87/ha
-```
+### 📈 Critérios de Precificação
+Integra dados de 6 fontes públicas:
+1. **Vegetação** - MapBiomas
+2. **Relevo** - SRTM/Google Earth Engine
+3. **Insalubridade** - DataSUS
+4. **Clima** - INMET (25 anos de dados)
+5. **Área** - CAR
+6. **Acesso** - Vias rodoviárias
 
-## 🛠️ Tecnologias
+## 📙 Impacto Entregue
+
+✅ **Protótipo virou padrão** - Governo federal adotou a solução
+✅ **Tomá da de decisão** - Identifica regiões críticas vs. favóveis
+✅ **Autômato de oramento** - Suporta decisões de alo cação de recursos
+✅ **Documentado** - Devs do gov conseguiram replicar sem dificuldades
+✅ **Escalável** - Base para integração com sistemas federais
+
+## 🛠️ Stack Técnico
 
 ```python
-Streamlit        # Framework web
-GeoPandas        # Análise geoespacial
-Folium          # Mapas interativos
-Plotly          # Gráficos avançados
-Pandas/NumPy    # Processamento de dados
-```
-
-## 📦 Instalação e Uso
-
-### Opção 1: Com `uv` (Recomendado)
-
-```bash
-uvx sync
-uv run streamlit run main.py
-```
-
-### Opção 2: Com `pip`
-
-```bash
-pip install -r requirements.txt
-streamlit run main.py
+Streamlit 1.32+         # Framework web para visualização
+GeoPandas 0.14+        # Análise geoespacial
+Folium 0.14+           # Mapas interativos
+Plotly                 # Gráficos dinâmicos
+Pandas/NumPy          # Processamento de dados
+Python 3.9+           # Linguagem
 ```
 
 ## 📂 Estrutura do Projeto
 
 ```
-.
-├── main.py                      # Ponto de entrada
-├── requirements.txt             # Dependências
-├── src/
-│   └── mda_app/
-│       ├── app.py              # Aplicação principal
-│       ├── components/         # Componentes de UI
-│       ├── config/             # Configurações
-│       ├── core/               # Lógica de dados
-│       └── utils/              # Utilitários
-├── data/
-│   └── raw/                    # Dados brutos
-├── notebooks/                  # Análises exploratórias
-└── tests/                      # Testes unitários
+mda-dashboard-precificacao/
+├── main.py                         # Aplicação principal
+├── requirements.txt               # Dependências
+├── README.md                      # Este arquivo
+├── src/mda_app/
+│   ├── app.py                     # Lógica principal
+│   ├── components/                # Componentes UI
+│   ├── config/                    # Configurações
+│   ├── core/                      # Lógica de dados
+│   └── utils/                     # Utilitários
+├── data/raw/                     # Dados brutos
+├── notebooks/                    # Análises exploratórias
+└── tests/                        # Testes
 ```
 
-## 📊 Fontes de Dados
+## 🚀 Como Usar
 
-- **MapBiomas**: Mosaicos de cobertura vegetal
-- **USGS SRTM**: Modelo digital de elevação (30m)
-- **DataSUS**: Indicadores de saúde pública
-- **INMET**: Dados climáticos e meteorológicos
-- **IBGE**: Limites administrativos e dados populacionais
-- **Base Zetta**: Dados fundiários (CAR, SIGEF, TIs, UCs)
+### Acessar Online
+```
+https://mda-dashboard-precificacao.streamlit.app/
+```
 
-## 🎓 Desenvolvido por
+### Rodar Localmente
+```bash
+git clone https://github.com/DennerCaleare/mda-dashboard-precificacao.git
+cd mda-dashboard-precificacao
+pip install -r requirements.txt
+streamlit run main.py
+```
 
-**Denner Caleare** | [GitHub](https://github.com/DennerCaleare) | [LinkedIn](https://linkedin.com/in/dennercaleare)
+## 📊 Tabela de Precificação
 
-Em parceria com a **Agência Zetta** para o Ministério do Desenvolvimento Agrário.
+| Pontos | Valor/hectare |
+|--------|---------------|
+| ≤ 15 | R$ 49,83 |
+| 16-25 | R$ 59,80 |
+| 26-35 | R$ 104,78 |
+| 36-45 | R$ 134,88 |
+| 46-55 | R$ 164,95 |
+| > 55 | R$ 202,87 |
 
-## 📄 Requisitos do Sistema
+## 📚 Fontes de Dados Inteligradas
 
-- Python 3.9 ou superior
-- pip ou uv instalado
-- 2GB de RAM disponível
-- Conexão com internet (para dados MapBiomas)
+- **MapBiomas** - Cobertura vegetal (10m resolução)
+- **USGS SRTM** - Modelo digital de elevação (30m)
+- **DataSUS** - Saúde pública
+- **INMET** - Dados climáticos (25 anos)
+- **IBGE** - Limites administrativos
+- **Base Zetta** - Dados fundiários
+
+## 👨‍💻 Desenvolvido por
+
+**Denner Caleare**
+
+- 🌟 Desenvolvedor especialista em dashboards geoespaciais
+- 📚 Author de soluções adotadas por gov federal
+- 💼 Agência Zetta - UFLA
+
+**Contato:**
+- [GitHub](https://github.com/DennerCaleare)
+- [LinkedIn](https://linkedin.com/in/dennercaleare)
 
 ## 📝 Licença
 
-Este projeto é de uso interno do Ministério do Desenvolvimento Agrário.
+Desenvolvido para o Ministério do Desenvolvimento Agrário. Protótipo para adopção federal.
 
 ---
 
