@@ -1,123 +1,124 @@
-﻿# MDA Dashboard - Precificação de Áreas
+# MDA Dashboard - Precificação de Áreas 🗺️
 
-Dashboard interativo para análise de precificação de áreas de georreferenciamento desenvolvido para o Ministério do Desenvolvimento Agrário.
+> Dashboard interativo para análise e precificação de áreas de georreferenciamento desenvolvido para o Ministério do Desenvolvimento Agrário.
+
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://mda-dashboard-precificacao.streamlit.app/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ## 🚀 Versão Online
 
-[Ver Dashboard em Produção](https://mda-dashboard-precificacao-main-main-py.streamlit.app)
+**Acesse o dashboard em tempo real:**
 
-## Descrição
+👉 **[MDA Dashboard - Precificação](https://mda-dashboard-precificacao.streamlit.app/)**
 
-Este projeto apresenta um dashboard desenvolvido em Streamlit para análise e visualização de dados de precificação de serviços de georreferenciamento em municípios brasileiros. A ferramenta permite análise espacial, estatística e temporal dos critérios que compõem a precificação de áreas.
+## 📋 Sobre o Projeto
 
-## Funcionalidades Principais
+Sistema completo de análise e visualização de dados para precificação de serviços de georreferenciamento em municípios brasileiros. A plataforma integra dados de múltiplas fontes (MapBiomas, SRTM, DataSUS, INMET) para calcular valores de referência baseados em critérios técnicos.
 
-- **Mapa Interativo**: Visualização geoespacial dos municípios com diferentes critérios de análise
-- **Estatísticas Detalhadas**: 10 indicadores principais incluindo área total, perímetro, valores médios, mínimos e máximos
-- **Análise por Trimestre**: Visualização de notas e valores por período
-- **Gráfico de Notas**: Comparativo visual das notas por trimestre
-- **Medidor de Área Georreferenciável**: Percentual de área disponível para georreferenciamento
-- **Filtros Dinâmicos**: Seleção por UF, município e critérios específicos
-- **Tabela Completa**: Visualização detalhada de todos os dados dos municípios
+### ✨ Funcionalidades Principais
 
-## Como Executar
+- 📍 **Mapa Interativo**: Visualização geoespacial com filtros por estado e município
+- 📊 **10 Indicadores Estatísticos**: Área total, perímetro, valores médios, mínimos e máximos
+- 📈 **Análise Temporal**: Visualização trimestral de notas e valores
+- 🎯 **Medidor de Performance**: Percentual de área georreferenciável
+- 🔄 **Filtros Dinâmicos**: Seleção granular por UF, município e critérios
+- 📑 **Tabelas Detalhadas**: Exportação de dados completos
+- 📱 **Interface Responsiva**: Funciona em desktop e mobile
 
-### Opção 1: Com uv (recomendado)
+## 🏗️ Critérios de Precificação
+
+| Critério | Fonte de Dados | Descrição |
+|----------|----------------|----------|
+| **Vegetação** | MapBiomas (10m) | Classificação de cobertura vegetal predominante |
+| **Relevo** | SRTM/Google Earth Engine | Tipologia de Lepsch (1983) |
+| **Insalubridade** | DataSUS | Dengue e ataques de animais peçonhentos |
+| **Clima** | INMET/BigQuery (25 anos) | Séries históricas com aplicação de krigagem |
+| **Área** | CAR | Média de áreas de lotes por município |
+| **Acesso** | Vias rodoviárias | Disponibilidade de vias de acesso |
+
+## 💰 Tabela de Valores
+
+```
+≤ 15 pontos    →  R$ 49,83/ha
+16-25 pontos   →  R$ 59,80/ha
+26-35 pontos   →  R$ 104,78/ha
+36-45 pontos   →  R$ 134,88/ha
+46-55 pontos   →  R$ 164,95/ha
+> 55 pontos    →  R$ 202,87/ha
+```
+
+## 🛠️ Tecnologias
+
+```python
+Streamlit        # Framework web
+GeoPandas        # Análise geoespacial
+Folium          # Mapas interativos
+Plotly          # Gráficos avançados
+Pandas/NumPy    # Processamento de dados
+```
+
+## 📦 Instalação e Uso
+
+### Opção 1: Com `uv` (Recomendado)
 
 ```bash
-uv sync
+uvx sync
 uv run streamlit run main.py
 ```
 
-### Opção 2: Com pip
+### Opção 2: Com `pip`
 
 ```bash
 pip install -r requirements.txt
 streamlit run main.py
 ```
 
-## Tecnologias Utilizadas
-
-- **Streamlit** - Framework para aplicações web em Python
-- **GeoPandas** - Manipulação e análise de dados geoespaciais
-- **Folium** - Visualização de mapas interativos
-- **Plotly** - Gráficos interativos
-- **Pandas/NumPy** - Análise e manipulação de dados
-
-## Critérios de Precificação
-
-A precificação é calculada com base nos seguintes critérios:
-
-### Vegetação
-
-Dados obtidos da plataforma MapBiomas (Coleção 2 - 10m de resolução). A nota é calculada com base na vegetação predominante e média do município.
-
-### Relevo
-
-Classificação baseada em dados SRTM (30m) do Google Earth Engine, seguindo a tipologia de Lepsch (1983).
-
-### Insalubridade
-
-Dados do DataSUS considerando ocorrências de dengue e ataques de animais peçonhentos.
-
-### Clima
-
-Séries históricas de 25 anos do INMET via BigQuery, com aplicação de krigagem ordinária para distribuição espacial.
-
-### Área
-
-Média das áreas de lotes CAR por município.
-
-### Acesso
-
-Disponibilidade de acesso por vias rodoviárias.
-
-## Estrutura de Valores
-
-A precificação segue a tabela de referência baseada na pontuação total:
-
-- ** 15 pontos**: R$ 49,83/ha
-- **16-25 pontos**: R$ 59,80/ha
-- **26-35 pontos**: R$ 104,78/ha
-- **36-45 pontos**: R$ 134,88/ha
-- **46-55 pontos**: R$ 164,95/ha
-- **> 55 pontos**: R$ 202,87/ha
-
-## Estrutura do Projeto
+## 📂 Estrutura do Projeto
 
 ```
- main.py                 # Ponto de entrada da aplicação
- src/
-    mda_app/
-        app.py          # Aplicação principal
-        components/     # Componentes de UI e visualizações
-        config/         # Configurações
-        core/           # Lógica de carregamento de dados
-        utils/          # Utilitários e formatadores
- .streamlit/
-    config.toml         # Configuração do tema
- data/                   # Dados do projeto
- requirements.txt        # Dependências
+.
+├── main.py                      # Ponto de entrada
+├── requirements.txt             # Dependências
+├── src/
+│   └── mda_app/
+│       ├── app.py              # Aplicação principal
+│       ├── components/         # Componentes de UI
+│       ├── config/             # Configurações
+│       ├── core/               # Lógica de dados
+│       └── utils/              # Utilitários
+├── data/
+│   └── raw/                    # Dados brutos
+├── notebooks/                  # Análises exploratórias
+└── tests/                      # Testes unitários
 ```
 
-## Requisitos do Sistema
+## 📊 Fontes de Dados
+
+- **MapBiomas**: Mosaicos de cobertura vegetal
+- **USGS SRTM**: Modelo digital de elevação (30m)
+- **DataSUS**: Indicadores de saúde pública
+- **INMET**: Dados climáticos e meteorológicos
+- **IBGE**: Limites administrativos e dados populacionais
+- **Base Zetta**: Dados fundiários (CAR, SIGEF, TIs, UCs)
+
+## 🎓 Desenvolvido por
+
+**Denner Caleare** | [GitHub](https://github.com/DennerCaleare) | [LinkedIn](https://linkedin.com/in/dennercaleare)
+
+Em parceria com a **Agência Zetta** para o Ministério do Desenvolvimento Agrário.
+
+## 📄 Requisitos do Sistema
 
 - Python 3.9 ou superior
-- Bibliotecas listadas em requirements.txt
+- pip ou uv instalado
+- 2GB de RAM disponível
+- Conexão com internet (para dados MapBiomas)
 
-## Fontes de Dados
+## 📝 Licença
 
-- **MapBiomas**: Dados de vegetação
-- **USGS SRTM**: Modelo digital de elevação
-- **DataSUS**: Dados de saúde pública
-- **INMET/BigQuery**: Dados climáticos
-- **IBGE**: Limites municipais e dados populacionais
-- **Base Zetta**: Dados fundiários (CAR, SIGEF, Terras da União, UCs, TIs)
+Este projeto é de uso interno do Ministério do Desenvolvimento Agrário.
 
-## Desenvolvimento
+---
 
-Desenvolvido pela **Agência Zetta** para análise de precificação de serviços de georreferenciamento.
-
-## Licença
-
-Este projeto é destinado ao uso interno do Ministério do Desenvolvimento Agrário.
+**Desenvolvido com ❤️ em Lavras, MG**
