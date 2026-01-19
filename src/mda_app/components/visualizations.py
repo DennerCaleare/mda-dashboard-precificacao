@@ -43,7 +43,14 @@ def get_color(value, min_val, max_val, global_min=6, global_max=60):
 
 
 def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, padding_zoom=30):
-    """Criar mapa folium com dados filtrados."""
+    """Criar mapa folium com dados filtrados.
+    
+    Args:
+        gdf_filtrado: GeoDataFrame com dados filtrados
+        criterio_sel: Critério selecionado (usado para grau de dificuldade)
+        mostrar_controle_camadas: Mostrar ou não o controle de camadas
+        padding_zoom: Padding para o zoom automático
+    """
     # Calcular o centro dos dados
     centro_lat = gdf_filtrado.centroid.y.mean()
     centro_lon = gdf_filtrado.centroid.x.mean()
@@ -72,20 +79,19 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
         show=False
     ).add_to(m)
     
-    # Valores mínimo e máximo do critério
-    min_val = gdf_filtrado[criterio_sel].min()
-    max_val = gdf_filtrado[criterio_sel].max()
+    # Criar duas camadas overlay (mas com comportamento mutuamente exclusivo): uma para cada tipo de visualização
+    # Camada 1: Grau de Dificuldade
+    layer_grau_dificuldade = folium.FeatureGroup(name='Grau de Dificuldade', show=True, control=True, overlay=True)
     
-    # Definir escala global (0 a 60 para notas)
+    # Adicionar polígonos para Grau de Dificuldade
+    coluna_dados = criterio_sel
     global_min = 0
     global_max = 60
+    min_val = gdf_filtrado[coluna_dados].min()
+    max_val = gdf_filtrado[coluna_dados].max()
     
-    # Criar um FeatureGroup para agrupar todos os municípios (não aparece no controle de camadas)
-    municipios_layer = folium.FeatureGroup(name='Municípios', show=True, control=False)
-    
-    # Adicionar polígonos ao mapa
     for idx, row in gdf_filtrado.iterrows():
-        color = get_color(row[criterio_sel], min_val, max_val, global_min, global_max)
+        color = get_color(row[coluna_dados], min_val, max_val, global_min, global_max)
         
         # Usar mun_nome se disponível, senão NM_MUN
         nome_municipio = row.get('mun_nome', row['NM_MUN'])
@@ -121,16 +127,67 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
                 'fillOpacity': 0.9
             },
             tooltip=tooltip
-        ).add_to(municipios_layer)
+        ).add_to(layer_grau_dificuldade)
     
-    # Adicionar o FeatureGroup ao mapa
-    municipios_layer.add_to(m)
+    # Adicionar a camada de Grau de Dificuldade ao mapa
+    layer_grau_dificuldade.add_to(m)
+    
+    # Camada 2: % Área Georreferenciável
+    layer_area_georef = folium.FeatureGroup(name='% Área Georreferenciável', show=False, control=True, overlay=True)
+    
+    # Adicionar polígonos para % Área Georreferenciável
+    coluna_dados_georef = "percent_area_georef"
+    global_min_georef = 0
+    global_max_georef = 100
+    min_val_georef = gdf_filtrado[coluna_dados_georef].min()
+    max_val_georef = gdf_filtrado[coluna_dados_georef].max()
+    
+    for idx, row in gdf_filtrado.iterrows():
+        color_georef = get_color(row[coluna_dados_georef], min_val_georef, max_val_georef, global_min_georef, global_max_georef)
+        
+        # Usar mun_nome se disponível, senão NM_MUN
+        nome_municipio_georef = row.get('mun_nome', row['NM_MUN'])
+        
+        # Criar tooltip simples com o nome do município
+        tooltip_georef = folium.Tooltip(
+            nome_municipio_georef,
+            sticky=False,
+            style="""
+                background-color: rgba(255, 255, 255, 0.95);
+                border: 2px solid #0066cc;
+                border-radius: 6px;
+                padding: 8px 12px;
+                font-size: 13px;
+                font-weight: 500;
+                color: #333;
+                box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            """
+        )
+        
+        # Adicionar GeoJson apenas com tooltip, sem popup
+        folium.GeoJson(
+            row['geometry'],
+            style_function=lambda feature, color=color_georef: {
+                'fillColor': color,
+                'color': 'black',
+                'weight': 1,
+                'fillOpacity': 0.7,
+            },
+            highlight_function=lambda x: {
+                'weight': 3,
+                'color': '#0066cc',
+                'fillOpacity': 0.9
+            },
+            tooltip=tooltip_georef
+        ).add_to(layer_area_georef)
+    
+    # Adicionar a camada de % Área Georreferenciável ao mapa
+    layer_area_georef.add_to(m)
     
     # Ajustar zoom automaticamente para os limites dos dados filtrados
     bounds = gdf_filtrado.total_bounds  # [minx, miny, maxx, maxy]
     m.fit_bounds([[bounds[1], bounds[0]], [bounds[3], bounds[2]]], padding=[padding_zoom, padding_zoom])
     
-    # Criar legenda com gradiente de cores
     # Gerar cores de exemplo para verificar o gradiente correto
     num_steps = 100
     gradient_colors = []
@@ -155,12 +212,9 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
     
     gradient_str = ', '.join(gradient_colors)
     
-    # Usar sempre a escala fixa de 6 a 60 para a legenda
-    legend_min = 6
-    legend_max = 60
-    
-    legend_html = f'''
-    <div style="position: fixed; 
+    # Criar duas legendas: uma para cada camada
+    legend_grau_html = f'''
+    <div id="legend-grau" style="position: fixed; 
                 bottom: 50px; 
                 left: 50px; 
                 width: 200px; 
@@ -170,19 +224,122 @@ def criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True, paddin
                 z-index: 9999; 
                 font-size: 14px;
                 padding: 10px;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                display: block;">
         <p style="margin: 0 0 10px 0; font-weight: bold; text-align: center; font-size: 12px;">Grau de Dificuldade</p>
         <div style="background: linear-gradient(to right, {gradient_str}); 
                     height: 20px; 
                     border: 1px solid #333;
                     border-radius: 3px;"></div>
         <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px;">
-            <span>{legend_min:.2f}</span>
-            <span>{legend_max:.2f}</span>
+            <span>6.00</span>
+            <span>60.00</span>
         </div>
     </div>
     '''
-    m.get_root().html.add_child(folium.Element(legend_html))
+    
+    legend_georef_html = f'''
+    <div id="legend-georef" style="position: fixed; 
+                bottom: 50px; 
+                left: 50px; 
+                width: 200px; 
+                background-color: white; 
+                border: 2px solid grey; 
+                border-radius: 5px;
+                z-index: 9999; 
+                font-size: 14px;
+                padding: 10px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                display: none;">
+        <p style="margin: 0 0 10px 0; font-weight: bold; text-align: center; font-size: 12px;">% Área Georreferenciável</p>
+        <div style="background: linear-gradient(to right, {gradient_str}); 
+                    height: 20px; 
+                    border: 1px solid #333;
+                    border-radius: 3px;"></div>
+        <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px;">
+            <span>0.00</span>
+            <span>100.00</span>
+        </div>
+    </div>
+    '''
+    
+    # Script JavaScript para alternar legendas conforme camadas ativas
+    legend_toggle_script = '''
+    <script>
+    (function() {
+        var grauInput = null;
+        var georefInput = null;
+        var isSetup = false;
+        
+        function updateLegends() {
+            var legendGrau = document.getElementById('legend-grau');
+            var legendGeoref = document.getElementById('legend-georef');
+            
+            if (legendGrau && grauInput) {
+                legendGrau.style.display = grauInput.checked ? 'block' : 'none';
+            }
+            if (legendGeoref && georefInput) {
+                legendGeoref.style.display = georefInput.checked ? 'block' : 'none';
+            }
+        }
+        
+        function setupLegends() {
+            if (isSetup) return;
+            
+            // Buscar todos os inputs no controle de layers
+            var allInputs = document.querySelectorAll('.leaflet-control-layers-overlays label');
+            
+            allInputs.forEach(function(label) {
+                var span = label.querySelector('span');
+                if (span) {
+                    var text = span.textContent.trim();
+                    var input = label.querySelector('input');
+                    
+                    if (text === 'Grau de Dificuldade') {
+                        grauInput = input;
+                    } else if (text === '% Área Georreferenciável') {
+                        georefInput = input;
+                    }
+                }
+            });
+            
+            if (!grauInput || !georefInput) return;
+            
+            // Adicionar listeners para atualizar legendas
+            grauInput.addEventListener('change', function() {
+                updateLegends();
+            });
+            
+            georefInput.addEventListener('change', function() {
+                updateLegends();
+            });
+            
+            isSetup = true;
+            updateLegends();
+        }
+        
+        // Usar MutationObserver para detectar quando o controle é adicionado
+        var observer = new MutationObserver(function(mutations) {
+            setupLegends();
+        });
+        
+        // Observar mudanças no body
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+        
+        // Tentar setup imediatamente também
+        setTimeout(setupLegends, 500);
+        setTimeout(setupLegends, 1000);
+        setTimeout(setupLegends, 2000);
+    })();
+    </script>
+    '''
+    
+    m.get_root().html.add_child(folium.Element(legend_grau_html))
+    m.get_root().html.add_child(folium.Element(legend_georef_html))
+    m.get_root().html.add_child(folium.Element(legend_toggle_script))
     
     # Adicionar controle de camadas (opcional)
     if mostrar_controle_camadas:

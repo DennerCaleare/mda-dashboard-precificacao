@@ -6,25 +6,16 @@ from mda_app.config.settings import COLORS
 
 def render_header():
     """Renderizar cabeçalho da aplicação."""
-    col1, col2, col3 = st.columns([1, 1, 3])
-
-    with col1:
-        st.image("assets/images/img_1.png", width=250)
-
-    with col2:
-        st.markdown(
-            f"""
-            <div style="text-align: center;">
-                <h1 style='color: {COLORS["primary"]}; margin-bottom: 0; white-space: nowrap;'>
-                    Dashboard - Precificação de Áreas Georreferenciáveis
-                </h1>
-                <h3 style='color:{COLORS["primary"]}; font-weight: normal; margin-top: 5px; white-space: nowrap;'>
-                    Graus de Dificuldade e Valores
-                </h3>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    st.markdown(
+        f"""
+        <div style="text-align: center;">
+            <h1 style='color: {COLORS["primary"]}; margin-bottom: 0;'>
+                Dashboard - Precificação de Áreas Georreferenciáveis
+            </h1>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def render_metrics(gdf_filtrado):

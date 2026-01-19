@@ -34,78 +34,83 @@ def configurar_pagina():
     )
 
 
-def configurar_sidebar_styles():
-    """Configurar estilos da sidebar."""
+def configurar_estilos():
+    """Configurar estilos customizados."""
     st.markdown("""
         <style>
-        [data-testid="stSidebar"] {
-            background-color: #E5E5E5;
-        }
         div[data-baseweb="select"] span {
             color: #006199;
             font-weight: 500;
-        }
-        .st-c1 {
-            background-color:#E5E5E5;
-        }
-        div[data-baseweb="slider"] > div > div {
-            background-color: black !important;
         }
         </style>
         """, unsafe_allow_html=True)
 
 
-def criar_filtros_sidebar(gdf):
-    """Criar filtros na sidebar."""
-    # Filtro de UF
-    ufs = gdf["SIGLA_UF"].unique()
-    uf_sel = st.sidebar.multiselect("Seleção de Estado (UF)", options=ufs, default=list(ufs))
+def criar_filtros(gdf):
+    """Criar filtros na área principal."""
     
-    # Filtro de Municípios (baseado nas UFs selecionadas)
-    if uf_sel:
-        # Filtrar municípios apenas das UFs selecionadas
-        gdf_filtrado_uf = gdf[gdf["SIGLA_UF"].isin(uf_sel)]
-        # Usar mun_nome se disponível, senão NM_MUN
-        if 'mun_nome' in gdf_filtrado_uf.columns:
-            municipios = sorted(gdf_filtrado_uf["mun_nome"].unique())
+    # Criar colunas para os filtros
+    col1, col2, col3 = st.columns(3)
+    
+    # Mapeamento de regiões e estados
+    regioes_estados = {
+        "Norte": ["AC", "AP", "AM", "PA", "RO", "RR", "TO"],
+        "Nordeste": ["AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE"],
+        "Centro-Oeste": ["DF", "GO", "MT", "MS"],
+        "Sudeste": ["ES", "MG", "RJ", "SP"],
+        "Sul": ["PR", "RS", "SC"]
+    }
+    
+    with col1:
+        # Filtro de Região
+        regioes = ["Todas"] + list(regioes_estados.keys())
+        regiao_sel = st.selectbox("Região", options=regioes, index=0)
+    
+    with col2:
+        # Filtro de UF baseado na região
+        if regiao_sel == "Todas":
+            ufs_disponiveis = sorted(gdf["SIGLA_UF"].unique())
         else:
-            municipios = sorted(gdf_filtrado_uf["NM_MUN"].unique())
+            ufs_disponiveis = sorted([uf for uf in regioes_estados[regiao_sel] if uf in gdf["SIGLA_UF"].unique()])
         
-        # Inicializar estado de municípios selecionados
-        if 'municipios_selecionados' not in st.session_state:
-            st.session_state.municipios_selecionados = []
-        
-        # Multiselect com placeholder "Todos"
-        municipios_sel = st.sidebar.multiselect(
-            "Filtro de Municípios",
-            options=municipios,
-            default=st.session_state.municipios_selecionados,
-            placeholder="Todos os municípios",
-            help="Deixe vazio para mostrar todos, ou selecione um ou mais municípios específicos.",
-            key="multiselect_municipios"
-        )
-        
-        # Atualizar session_state apenas se houver mudança real
-        if municipios_sel != st.session_state.municipios_selecionados:
-            st.session_state.municipios_selecionados = municipios_sel
-
-        
-        # Se nenhum município selecionado, usar todos
-        if not municipios_sel:
-            municipios_sel = municipios
-    else:
-        municipios_sel = []
+        uf_sel = st.multiselect("Estado (UF)", options=ufs_disponiveis, default=ufs_disponiveis)
     
-    # Critério fixo em nota_media para melhor performance
+    with col3:
+        # Filtro de Municípios (baseado nas UFs selecionadas)
+        if uf_sel:
+            gdf_filtrado_uf = gdf[gdf["SIGLA_UF"].isin(uf_sel)]
+            if 'mun_nome' in gdf_filtrado_uf.columns:
+                municipios = sorted(gdf_filtrado_uf["mun_nome"].unique())
+            else:
+                municipios = sorted(gdf_filtrado_uf["NM_MUN"].unique())
+            
+            # Inicializar estado de municípios selecionados
+            if 'municipios_selecionados' not in st.session_state:
+                st.session_state.municipios_selecionados = []
+            
+            municipios_sel = st.multiselect(
+                "Município",
+                options=municipios,
+                default=st.session_state.municipios_selecionados,
+                placeholder="Todos os municípios",
+                help="Deixe vazio para mostrar todos",
+                key="multiselect_municipios"
+            )
+            
+            if municipios_sel != st.session_state.municipios_selecionados:
+                st.session_state.municipios_selecionados = municipios_sel
+            
+            if not municipios_sel:
+                municipios_sel = municipios
+        else:
+            municipios_sel = []
+    
+    st.markdown("---")
+    
+    # Critério fixo em nota_media
     criterio_sel = "nota_media"
-    
-    # Slider do critério (Grau de Dificuldade Médio)
     crit_min, crit_max = float(gdf[criterio_sel].min()), float(gdf[criterio_sel].max())
-    crit_sel = st.sidebar.slider(
-        "Grau de Dificuldade Médio", 
-        crit_min, crit_max, 
-        (crit_min, crit_max)
-    )
+    crit_sel = (crit_min, crit_max)
     
     return uf_sel, municipios_sel, criterio_sel, crit_sel
 
@@ -115,18 +120,27 @@ def aplicar_filtros(gdf, uf_sel, municipios_sel, criterio_sel, crit_sel):
     # Determinar qual coluna de nome usar
     coluna_nome = 'mun_nome' if 'mun_nome' in gdf.columns else 'NM_MUN'
     
-    filtros = (
-        gdf["SIGLA_UF"].isin(uf_sel) &
-        gdf[coluna_nome].isin(municipios_sel) &
-        gdf[criterio_sel].between(*crit_sel)
-    )
-    return gdf[filtros]
+    # Começar com todos os dados
+    gdf_filtrado = gdf.copy()
+    
+    # Aplicar filtro de UF se houver seleção
+    if uf_sel:
+        gdf_filtrado = gdf_filtrado[gdf_filtrado["SIGLA_UF"].isin(uf_sel)]
+    
+    # Aplicar filtro de Município se houver seleção
+    if municipios_sel:
+        gdf_filtrado = gdf_filtrado[gdf_filtrado[coluna_nome].isin(municipios_sel)]
+    
+    # Aplicar filtro de critério (sempre aplicado)
+    gdf_filtrado = gdf_filtrado[gdf_filtrado[criterio_sel].between(*crit_sel)]
+    
+    return gdf_filtrado
 
 
 def main():
     """Função principal da aplicação."""
     configurar_pagina()
-    configurar_sidebar_styles()
+    configurar_estilos()
     
     # Renderizar cabeçalho
     render_header()
@@ -134,19 +148,6 @@ def main():
     # Carregar e processar dados
     gdf = carregar_dados()
     gdf = processar_dados_geograficos(gdf)
-    
-    # Criar filtros
-    uf_sel, municipios_sel, criterio_sel, crit_sel = criar_filtros_sidebar(gdf)
-    
-    # Aplicar filtros
-    gdf_filtrado = aplicar_filtros(gdf, uf_sel, municipios_sel, criterio_sel, crit_sel)
-    
-    # Verificar se há dados após aplicar filtros
-    if len(gdf_filtrado) == 0:
-        st.warning("⚠️ Nenhum município encontrado com os filtros selecionados. Por favor, ajuste os filtros.")
-        st.stop()
-    
-    gdf_filtrado2 = gdf_filtrado.to_crs(epsg=5880)
     
     # Criar abas
     abas = st.tabs(["Mapa", "Introdução"])
@@ -235,6 +236,19 @@ predominante no município (aberta, intermediária e fechada) e nota específica
     
     # Aba Mapa (índice 0)
     with abas[0]:
+        # Criar filtros dentro da aba Mapa
+        uf_sel, municipios_sel, criterio_sel, crit_sel = criar_filtros(gdf)
+        
+        # Aplicar filtros
+        gdf_filtrado = aplicar_filtros(gdf, uf_sel, municipios_sel, criterio_sel, crit_sel)
+        
+        # Verificar se há dados após aplicar filtros
+        if len(gdf_filtrado) == 0:
+            st.warning("⚠️ Nenhum município encontrado com os filtros selecionados. Por favor, ajuste os filtros.")
+            st.stop()
+        
+        gdf_filtrado2 = gdf_filtrado.to_crs(epsg=5880)
+        
         # Criar mapa
         m = criar_mapa(gdf_filtrado, criterio_sel, mostrar_controle_camadas=True)
         
